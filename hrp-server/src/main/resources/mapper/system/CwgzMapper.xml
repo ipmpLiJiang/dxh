@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.CwgzMapper">
+    <resultMap id="gzMap" type="cc.mrbird.febs.system.domain.Cwgz">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+	<resultMap id="emolumentMap" type="cc.mrbird.febs.system.domain.Emolument">
+		<!--
+          WARNING - @mbg.generated
+        -->
+	</resultMap>
+    <select id="getGz" resultMap="gzMap">
+        select gz.*,sb.Yanglgr,sb.Yilgrjn,sb.Shiygrbj,sb.Deylgrjn from(select d.code cPsnNum,e.employeename cPsnName,if(c.`status`=7,"5R01",if(c.`status`=2 or c.`status`=6 or c.`status`=3,"5R02",dept.code)) cDeptnum,if(c.`status`=7,"离休",if(c.`status`=2 or c.`status`=6 or c.`status`=3,"死亡和退休",dept.valuee)) cDeptName,e.idnumber Idnum,
+		if(c.status =1 ,if(c.employeetype = 1,"在编",if(c.employeetype = 2 ,"合同",if(c.employeetype = 3,"代理",c.employeetype))),if(c.status = 2,"退休",if(c.status = 5,"离职",if(c.status = 6,"死亡",if(c.status = 7,"离休",c.statusname))))) rPersonType,
+		if(c.status =1,"在职",if(c.status = 2,"退休",if(c.status = 3,"返聘",if(c.status = 4 or c.status =5,"离职",if(c.status = 6,"死亡",if(c.status = 7,"离休",c.statusname))))))rEmployState,
+        m.period,m.gwgz Gwgz,m.cxjt Cxjt,m.xjgz Xjgz,m.hljt Hljt,m.hs Hs10,m.Gcb Gcb,m.tgjt Tgjt,m.ft Ft,
+        m.wsf Wsf,m.ylbz Ylbz,m.dzbt Dzbt1,m.jcxjx Jcxjx,m.gp Gp,m.jtbt Jtbt,m.wybt Wybt,
+        m.cebt Cebt,m.gzyf Gzyf,m.td2016 Td2016,m.td2017 Td2017,m.td2018 Td2018,m.td2019 Td2019,m.td2020 Td2020,m.td2021 Td2021,
+        m.sc Sc, m2.drugcost drugCost,m2.hydropowercost hydropowerCost,m2.roomcharge roomCharge,m2.meetingcost meetingCost,
+        m2.accumulationcost accumulationCost,m2.incometax incomeTax,m2.zgongyl Zgongyl,m2.zynj Zynj,
+        m2.deylgrbj Deylgrbj,m2.hrotherreduce HrOtherReduce,m2.savedown SaveDown,m.qt Qt,m.lmbz Lmbz,h.bing Bjts,h.kk1+h.kk2 Kqkk,m.bzyl
+        from emolument m
+        left join (select * from emolument where period=#{lastPeriod}) m2 on m.idnumber=m2.idnumber
+		left join employee e on m.idnumber=e.idnumber
+		left join employee_core  c ON e.employeeid=c.employeeid and c.startdate&lt;=#{period} and c.enddate&gt;=#{period}
+		left join department dept on c.ward=dept.keyy
+        left join kq_hz h on m.idnumber=h.idnumber and h.kqdate=#{lastPeriod}
+		left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        where m.period=#{period}) gz
+        LEFT JOIN
+        (select IFNULL(yanglao.idnumber,IFNULL(yl.idnumber,IFNULL(sy.idnumber,IFNULL(deyl.idnumber,null)))) Idnum,
+        IFNULL(yanglao.employeename,IFNULL(yl.employeename,IFNULL(sy.employeename,IFNULL(deyl.employeename,null)))) cPsnName,yanglao.gr Yanglgr,yl.gr Yilgrjn,
+        sy.gr Shiygrbj,deyl.gr Deylgrjn from
+        (select idnumber,employeename,sum(gr) gr from sb_yanglao yanglao where shdate =#{period}   GROUP  BY idnumber) yanglao
+        LEFT JOIN
+        (SELECT idnumber,employeename,sum(gr) gr from sb_yl  where  shdate =#{period} GROUP  BY idnumber) yl on yanglao.idnumber=yl.idnumber
+        left join
+        (SELECT idnumber,employeename,sum(gr) gr from sb_sy  where  shdate =#{period} GROUP  BY idnumber) sy on yanglao.idnumber=sy.idnumber
+        LEFT JOIN
+        (SELECT idnumber,employeename,sum(gr) gr from sb_deyl  where  shdate =#{period} GROUP  BY idnumber) deyl on yanglao.idnumber=deyl.idnumber
+        UNION
+        select IFNULL(yanglao.idnumber,IFNULL(yl.idnumber,IFNULL(sy.idnumber,IFNULL(deyl.idnumber,null)))),
+        IFNULL(yanglao.employeename,IFNULL(yl.employeename,IFNULL(sy.employeename,IFNULL(deyl.employeename,null)))),yanglao.gr Yanglgr,
+        yl.gr Yilgrjn,sy.gr Shiygrbj,deyl.gr Deylgrjn  from
+        (SELECT idnumber, employeename, sum( gr ) gr FROM sb_deyl WHERE shdate = #{period} GROUP BY idnumber ) deyl LEFT JOIN
+	( SELECT idnumber, employeename, sum( gr ) gr FROM sb_yanglao yanglao WHERE shdate = #{period} GROUP BY idnumber ) yanglao on deyl.idnumber=yanglao.idnumber
+	LEFT JOIN ( SELECT idnumber, employeename, sum( gr ) gr FROM sb_yl WHERE shdate = #{period} GROUP BY idnumber ) yl on deyl.idnumber =yl.idnumber
+	left JOIN ( SELECT idnumber, employeename, sum( gr ) gr FROM sb_sy WHERE shdate = #{period} GROUP BY idnumber ) sy ON deyl.idnumber = sy.idnumber
+	)sb on gz.Idnum=sb.Idnum
+    </select>
+
+    <select id="getSb" resultMap="gzMap">
+        select sb.*,IFNULL(c.ward,c.dept) cDeptnum,c.employeetype rPersonType,d.code cPsnNum from (
+            select IFNULL(yanglao.idnumber,IFNULL(yl.idnumber,IFNULL(sy.idnumber,IFNULL(gs.idnumber,IFNULL(bzyl.idnumber,IFNULL(shengyu.idnumber,IFNULL(deyl.idnumber,null))))))) Idnum,
+            IFNULL(yanglao.employeename,IFNULL(yl.employeename,IFNULL(sy.employeename,IFNULL(gs.employeename,IFNULL(bzyl.employeename,IFNULL(shengyu.employeename,IFNULL(deyl.employeename,null))))))) cPsnName,
+            IFNULL(yanglao.socialnum,IFNULL(yl.socialnum,IFNULL(sy.socialnum,IFNULL(gs.socialnum,IFNULL(bzyl.socialnum,IFNULL(shengyu.socialnum,IFNULL(deyl.socialnum,null))))))) socialNum,
+            yanglao.gr Yanglgr,yanglao.dw Yangldw,
+            yl.gr Yilgrjn,yl.dw Yildw,
+            sy.gr Shiygrbj,sy.dw Shiydw,
+            shengyu.dw Shengyudw,
+            gs.dw Gsdwjn,
+            deyl.gr Deylgrjn,
+            bzyl.dw Bzyldw from
+            (select idnumber,socialnum,employeename,sum(gr) gr,sum(dw) dw from sb_yanglao yanglao where shdate =#{period}   GROUP  BY idnumber) yanglao
+            LEFT JOIN
+            (SELECT idnumber,socialnum,employeename,sum(gr) gr,sum(dw) dw from sb_yl  where  shdate =#{period} GROUP  BY idnumber) yl on yanglao.idnumber=yl.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(gr) gr,sum(dw)dw from sb_sy  where  shdate =#{period} GROUP  BY idnumber) sy on yanglao.idnumber=sy.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_gs  where  shdate =#{period} GROUP  BY idnumber) gs on yanglao.idnumber=gs.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_bzyl  where  shdate =#{period} GROUP  BY idnumber) bzyl on yanglao.idnumber=bzyl.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_shengyu  where  shdate =#{period} GROUP  BY idnumber) shengyu on yanglao.idnumber=shengyu.idnumber
+            LEFT JOIN
+            (SELECT idnumber,socialnum,employeename,sum(gr) gr from sb_deyl  where  shdate =#{period} GROUP  BY idnumber) deyl on yanglao.idnumber=deyl.idnumber
+            UNION
+            select IFNULL(yanglao.idnumber,IFNULL(yl.idnumber,IFNULL(sy.idnumber,IFNULL(gs.idnumber,IFNULL(bzyl.idnumber,IFNULL(shengyu.idnumber,IFNULL(deyl.idnumber,null))))))) Idnum,
+            IFNULL(yanglao.employeename,IFNULL(yl.employeename,IFNULL(sy.employeename,IFNULL(gs.employeename,IFNULL(bzyl.employeename,IFNULL(shengyu.employeename,IFNULL(deyl.employeename,null))))))) cPsnName,
+            IFNULL(yanglao.socialnum,IFNULL(yl.socialnum,IFNULL(sy.socialnum,IFNULL(gs.socialnum,IFNULL(bzyl.socialnum,IFNULL(shengyu.socialnum,IFNULL(deyl.socialnum,null))))))) socialNum,
+            yanglao.gr Yanglgr,yanglao.dw Yangldw,
+            yl.gr Yilgrjn,yl.dw Yildw,
+            sy.gr Shiygrbj,sy.dw Shiydw,
+            shengyu.dw Shengyudw,
+            gs.dw Gsdwjn,
+            deyl.gr Deylgrjn,
+            bzyl.dw Bzyldw from
+            (SELECT idnumber,socialnum, employeename, sum( gr ) gr FROM sb_deyl WHERE shdate = #{period} GROUP BY idnumber ) deyl
+            LEFT JOIN
+    	    (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_shengyu  where  shdate =#{period} GROUP  BY idnumber) shengyu on deyl.idnumber=shengyu.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_bzyl  where  shdate =#{period} GROUP  BY idnumber) bzyl on deyl.idnumber=bzyl.idnumber
+            left join
+            (SELECT idnumber,socialnum,employeename,sum(dw) dw from sb_gs  where  shdate =#{period} GROUP  BY idnumber) gs on deyl.idnumber=gs.idnumber
+    	    left JOIN
+    	    ( SELECT idnumber,socialnum, employeename, sum( gr ) gr,sum(dw) dw FROM sb_sy WHERE shdate = #{period} GROUP BY idnumber ) sy ON deyl.idnumber = sy.idnumber
+    	    LEFT JOIN
+    	    (SELECT idnumber,socialnum, employeename, sum( gr ) gr,sum(dw) dw FROM sb_yl WHERE shdate = #{period} GROUP BY idnumber ) yl on deyl.idnumber =yl.idnumber
+    	    left join
+    	    ( SELECT idnumber,socialnum, employeename, sum( gr ) gr,sum(dw) dw FROM sb_yanglao yanglao WHERE shdate = #{period} GROUP BY idnumber ) yanglao on deyl.idnumber=yanglao.idnumber
+	)  sb inner JOIN  employee e on sb.Idnum=e.idnumber
+	LEFT JOIN employee_core c on e.employeeid=c.employeeid and c.enddate='9999-12-31'
+	left join (select d1.employeeid employeeid,d1.employeecode code
+    from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+    where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+    </select>
+
+    <select id="getSbSum" resultMap="gzMap">
+        select cDeptnum,sum(Yanglgr) Yanglgr,sum(Yangldw) Yangldw,sum(Yilgrjn) Yilgrjn,sum(Yildw) Yildw,sum(Shiygrbj) Shiygrbj,sum(Shiydw) Shiydw,sum(Shengyudw) Shengyudw,sum(Gsdwjn) Gsdwjn,sum(Deylgrjn) Deylgrjn,sum(Bzyldw) Bzyldw from
+        (SELECT
+        	sb.*,
+        	IF( ISNULL(c.deptname),if(ISNULL(d.code),'社区代扣','离退休/死亡') ,c.deptname ) cDeptnum,
+        	c.employeetype rPersonType,
+        	d.CODE cPsnNum
+        FROM
+        	(
+        	SELECT
+        		IFNULL(
+        			yanglao.idnumber,
+        			IFNULL(
+        				yl.idnumber,
+        				IFNULL(
+        					sy.idnumber,
+        					IFNULL(
+        						gs.idnumber,
+        						IFNULL(
+        							bzyl.idnumber,
+        							IFNULL(
+        								shengyu.idnumber,
+        							IFNULL( deyl.idnumber, NULL ))))))) Idnum,
+        		IFNULL(
+        			yanglao.employeename,
+        			IFNULL(
+        				yl.employeename,
+        				IFNULL(
+        					sy.employeename,
+        					IFNULL(
+        						gs.employeename,
+        						IFNULL(
+        							bzyl.employeename,
+        							IFNULL(
+        								shengyu.employeename,
+        							IFNULL( deyl.employeename, NULL ))))))) cPsnName,
+        		IFNULL(
+        			yanglao.socialnum,
+        			IFNULL(
+        				yl.socialnum,
+        				IFNULL(
+        					sy.socialnum,
+        					IFNULL(
+        						gs.socialnum,
+        						IFNULL(
+        							bzyl.socialnum,
+        							IFNULL(
+        								shengyu.socialnum,
+        							IFNULL( deyl.socialnum, NULL ))))))) socialNum,
+        		yanglao.gr Yanglgr,
+        		yanglao.dw Yangldw,
+        		yl.gr Yilgrjn,
+        		yl.dw Yildw,
+        		sy.gr Shiygrbj,
+        		sy.dw Shiydw,
+        		shengyu.dw Shengyudw,
+        		gs.dw Gsdwjn,
+        		deyl.gr Deylgrjn,
+        		bzyl.dw Bzyldw
+        	FROM
+        		(
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_yanglao yanglao
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) yanglao
+        		LEFT JOIN (
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_yl
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) yl ON yanglao.idnumber = yl.idnumber
+        		LEFT JOIN (
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_sy
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) sy ON yanglao.idnumber = sy.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_gs WHERE shdate = #{period} GROUP BY idnumber ) gs ON yanglao.idnumber = gs.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_bzyl WHERE shdate = #{period} GROUP BY idnumber ) bzyl ON yanglao.idnumber = bzyl.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_shengyu WHERE shdate = #{period} GROUP BY idnumber ) shengyu ON yanglao.idnumber = shengyu.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( gr ) gr FROM sb_deyl WHERE shdate = #{period} GROUP BY idnumber ) deyl ON yanglao.idnumber = deyl.idnumber UNION
+        	SELECT
+        		IFNULL(
+        			yanglao.idnumber,
+        			IFNULL(
+        				yl.idnumber,
+        				IFNULL(
+        					sy.idnumber,
+        					IFNULL(
+        						gs.idnumber,
+        						IFNULL(
+        							bzyl.idnumber,
+        							IFNULL(
+        								shengyu.idnumber,
+        							IFNULL( deyl.idnumber, NULL ))))))) Idnum,
+        		IFNULL(
+        			yanglao.employeename,
+        			IFNULL(
+        				yl.employeename,
+        				IFNULL(
+        					sy.employeename,
+        					IFNULL(
+        						gs.employeename,
+        						IFNULL(
+        							bzyl.employeename,
+        							IFNULL(
+        								shengyu.employeename,
+        							IFNULL( deyl.employeename, NULL ))))))) cPsnName,
+        		IFNULL(
+        			yanglao.socialnum,
+        			IFNULL(
+        				yl.socialnum,
+        				IFNULL(
+        					sy.socialnum,
+        					IFNULL(
+        						gs.socialnum,
+        						IFNULL(
+        							bzyl.socialnum,
+        							IFNULL(
+        								shengyu.socialnum,
+        							IFNULL( deyl.socialnum, NULL ))))))) socialNum,
+        		yanglao.gr Yanglgr,
+        		yanglao.dw Yangldw,
+        		yl.gr Yilgrjn,
+        		yl.dw Yildw,
+        		sy.gr Shiygrbj,
+        		sy.dw Shiydw,
+        		shengyu.dw Shengyudw,
+        		gs.dw Gsdwjn,
+        		deyl.gr Deylgrjn,
+        		bzyl.dw Bzyldw
+        	FROM
+        		( SELECT idnumber, socialnum, employeename, sum( gr ) gr FROM sb_deyl WHERE shdate = #{period} GROUP BY idnumber ) deyl
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_shengyu WHERE shdate = #{period} GROUP BY idnumber ) shengyu ON deyl.idnumber = shengyu.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_bzyl WHERE shdate = #{period} GROUP BY idnumber ) bzyl ON deyl.idnumber = bzyl.idnumber
+        		LEFT JOIN ( SELECT idnumber, socialnum, employeename, sum( dw ) dw FROM sb_gs WHERE shdate = #{period} GROUP BY idnumber ) gs ON deyl.idnumber = gs.idnumber
+        		LEFT JOIN (
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_sy
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) sy ON deyl.idnumber = sy.idnumber
+        		LEFT JOIN (
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_yl
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) yl ON deyl.idnumber = yl.idnumber
+        		LEFT JOIN (
+        		SELECT
+        			idnumber,
+        			socialnum,
+        			employeename,
+        			sum( gr ) gr,
+        			sum( dw ) dw
+        		FROM
+        			sb_yanglao yanglao
+        		WHERE
+        			shdate = #{period}
+        		GROUP BY
+        			idnumber
+        		) yanglao ON deyl.idnumber = yanglao.idnumber
+        	) sb
+        	LEFT JOIN employee e ON sb.Idnum = e.idnumber
+        	LEFT JOIN employee_core c ON e.employeeid = c.employeeid
+        	AND c.enddate = '9999-12-31'
+        	LEFT JOIN (
+        	SELECT
+        		d1.employeeid employeeid,
+        		d1.employeecode CODE
+        	FROM
+        		( SELECT employeeid, max( enddate ) m FROM CODE GROUP BY employeeid ) t,
+        		CODE d1
+        	WHERE
+        		t.employeeid = d1.employeeid
+        	AND t.m = d1.enddate
+        	) d ON e.employeeid = d.employeeid) t GROUP BY cDeptnum
+    </select>
+
+    <insert id="saveToCW" parameterType="cwgz">
+        <selectKey keyProperty="id" resultType="string" order="BEFORE">
+            select newid() as id
+        </selectKey>
+        insert into HR_SalaryRecord (autoid,cPsn_Num,cPsn_Name,period,Idnum,cDept_num,cDept_Name,rPersonType,rEmployState,Gwgz,
+        Cxjt,Xjgz,Hljt,Hs10,Gcb,Tgjt,Ft,Wsf,Ylbz,Dzbt1,
+        Jcxjx,Gp,Jtbt,Wybt,Cebt,Gzyf,Td2016,Td2017,Td2018,
+        Td2019,Td2020,Td2021,Sc,Qt,Lmbz,Bjts,Kqkk,Yanglgr,Yilgrjn,Shiygrbj,Deylgrjn,drugCost,hydropowerCost,roomCharge,meetingCost,
+		accumulationCost,incomeTax,Zgongyl,Zynj,Deylgrbj,HrOtherReduce,SaveDown,isstout,bzyl)
+        values (#{id},#{cwgz.cpsnnum},#{cwgz.cpsnname},#{cwgz.period},#{cwgz.Idnum},#{cwgz.cDeptnum},#{cwgz.cdeptname},
+        #{cwgz.rpersontype},#{cwgz.rEmployState},#{cwgz.Gwgz},#{cwgz.Cxjt},#{cwgz.Xjgz},#{cwgz.Hljt},#{cwgz.Hs10},#{cwgz.Gcb},
+        #{cwgz.Tgjt},#{cwgz.Ft},#{cwgz.Wsf},#{cwgz.Ylbz},#{cwgz.Dzbt1},
+        #{cwgz.Jcxjx},#{cwgz.Gp},#{cwgz.Jtbt},#{cwgz.Wybt},#{cwgz.Cebt},#{cwgz.Gzyf},
+        #{cwgz.Td2016},#{cwgz.Td2017},#{cwgz.Td2018},#{cwgz.Td2019},#{cwgz.Td2020},#{cwgz.Td2021},#{cwgz.Sc},#{cwgz.Qt},#{cwgz.lmbz},
+        #{cwgz.Bjts},#{cwgz.Kqkk},#{cwgz.yanglgr},#{cwgz.yilgrjn},#{cwgz.shiygrbj},#{cwgz.deylgrjn},#{cwgz.drugCost},#{cwgz.hydropowerCost},
+		#{cwgz.roomCharge},#{cwgz.meetingCost},#{cwgz.accumulationCost},#{cwgz.incomeTax},#{cwgz.Zgongyl},#{cwgz.Zynj},#{cwgz.Deylgrbj},
+		#{cwgz.HrOtherReduce},#{cwgz.SaveDown},0,#{cwgz.bzyl})
+    </insert>
+
+    <insert id="createCwyd"  parameterType="cwyd">
+        <selectKey keyProperty="id" resultType="string" order="BEFORE">
+            select newid() as id
+        </selectKey>
+			insert into HR_PersonChange values (#{cwyd.cPsnNum},#{cwyd.cPsnName},#{cwyd.cDeptnum},#{cwyd.rPersonType},#{cwyd.rEmployState},
+        #{cwyd.rSex},#{cwyd.dBirthDate},#{cwyd.dEnterDate},#{cwyd.dLeaveDate},null,null,#{cwyd.sysAge},#{cwyd.isstout},#{cwyd.hPeriod},#{id})
+    </insert>
+
+	<select id="getCwKj" resultMap="emolumentMap">
+		select g.cPsn_Num code,CONVERT (decimal(20,2),g.drugCost) drugcost,CONVERT (decimal(20,2),g.hydropowerCost) hydropowercost,CONVERT (decimal(20,2),g.roomCharge) roomcharge,CONVERT (decimal(20,2),g.meetingCost) meetingcost,
+		CONVERT (decimal(20,2),g.accumulationCost) accumulationcost,CONVERT (decimal(20,2),g.incomeTax) incometax,CONVERT (decimal(20,2),g.Zgongyl) zgongyl,CONVERT (decimal(20,2),g.Zynj) zynj,CONVERT (decimal(20,2),g.Deylgrbj) deylgrbj,CONVERT (decimal(20,2),g.HrOtherReduce) hrotherreduce,
+		CONVERT (decimal(20,2),g.SaveDown) savedown,CONVERT (decimal(20,2),g.F_3) actual from XXY_Wa_Gzdata g where g.iYear=#{year} and g.iMonth=#{month}
+	</select>
+</mapper>

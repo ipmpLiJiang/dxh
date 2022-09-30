@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.KqJkMapper">
+    <resultMap id="kqJkMap" type="cc.mrbird.febs.system.domain.KqJk">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getKqJkList" resultMap="kqJkMap" parameterType="kqJk">
+        select e.employeename,e.employeeid,e.idnumber,e.emolumentstatus,e.kqdept kqdept,c.deptname dept,j.tjdept,c.employeetype,j.id,j.startdate,j.shdate,
+        j.a01,j.a02,j.a03,j.a04,j.a05,j.a06,j.a07,j.a08,j.a09,j.a10,j.a11,j.a12,j.a13,j.a14,j.a15,
+        j.a16,j.a17,j.a18,j.a19,j.a20,j.a21,j.a22,j.a23,j.a24,j.a25,j.a26,j.a27,j.a28,j.a29,j.a30,j.a31,
+        IF(IFNULL(j.id,1)=1,0,1) state from employee e
+        LEFT JOIN  employee_core c ON e.employeeid = c.employeeid and c.enddate='9999-12-31'
+        LEFT JOIN kq_jk j on e.idnumber=j.idnumber and j.startdate=#{kqjk.startdate}
+        where 1=1 and e.emolumentstatus=1 and  c.enddate >= #{kqjk.startdate} and (c.status=1 or c.status=3)
+        <if test="kqjk.employeeid != null ">and e.employeeid=#{kqjk.employeeid}</if>
+        <if test="kqjk.dept != null ">and e.kqdept=#{kqjk.dept}</if>
+        <if test="kqjk.state != null ">
+            and j.id is
+            <if test="kqjk.state == 1 ">
+                not
+            </if>
+            null
+        </if>
+    </select>
+<!--    <select id="getKqJkList" resultMap="kqJkMap" parameterType="kqJk">-->
+<!--        select e.employeename,e.employeeid,e.idnumber,e.emolumentstatus,e.kqdept kqdept,c.deptname dept,j.tjdept,c.employeetype,d.code employeecode,j.id,j.startdate,j.shdate,-->
+<!--        j.a01,j.a02,j.a03,j.a04,j.a05,j.a06,j.a07,j.a08,j.a09,j.a10,j.a11,j.a12,j.a13,j.a14,j.a15,-->
+<!--        j.a16,j.a17,j.a18,j.a19,j.a20,j.a21,j.a22,j.a23,j.a24,j.a25,j.a26,j.a27,j.a28,j.a29,j.a30,j.a31,-->
+<!--        IF(IFNULL(j.id,1)=1,0,1) state from employee e-->
+<!--        LEFT JOIN  employee_core c ON e.employeeid = c.employeeid and c.enddate='9999-12-31'-->
+<!--        LEFT JOIN kq_jk j on e.idnumber=j.idnumber and j.startdate=#{kqjk.startdate}-->
+<!--        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code-->
+<!--        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1-->
+<!--        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid-->
+<!--        where 1=1 and e.emolumentstatus=1 and  c.enddate >= #{kqjk.startdate} and (c.status=1 or c.status=3)-->
+<!--        <if test="kqjk.employeeid != null ">and e.employeeid=#{kqjk.employeeid}</if>-->
+<!--        <if test="kqjk.dept != null ">and e.kqdept=#{kqjk.dept}</if>-->
+<!--        <if test="kqjk.state != null ">-->
+<!--            and j.id is-->
+<!--            <if test="kqjk.state == 1 ">-->
+<!--                not-->
+<!--            </if>-->
+<!--            null-->
+<!--        </if>-->
+<!--    </select>-->
+
+    <select id="findDuplicateList" resultMap="kqJkMap" parameterType="kqJk">
+        select * from kq_jk where  idnumber in (SELECT idnumber FROM kq_jk WHERE startdate = #{kqjk.startdate} GROUP BY idnumber HAVING COUNT(idnumber) > 1)
+        <if test="kqjk.employeename != null ">and like concat('%',#{kqjk.employeename},'%')</if>
+        <if test="kqjk.dept != null ">and dept=#{kqjk.dept}</if>
+        order by employeename
+    </select>
+
+    <select id="getOAKqJk" resultMap="kqJkMap">
+        select j.RYBH employeecode,j.PBKSMS kqdept,j.KSRQ startdate,j.JSRQ enddate,j.RYBH employeecode,j.XM employeename,
+        j.A01 a01,j.A02 a02,j.A03 a03,j.A04 a04,j.A05 a05,j.A06 a06,j.A07 a07,j.A08 a08,j.A09 a09,j.A10 a10,
+        j.A11 a11,j.A12 a12,j.A13 a13,j.A14 a14,j.A15 a15,j.A16 a16,j.A17 a17,j.A18 a18,j.A19 a19,j.A20 a20,
+        j.A21 a21,j.A22 a22,j.A23 a23,j.A24 a24,j.A25 a25,j.A26 a26,j.A27 a27,j.A28 a28,j.A29 a29,j.A30 a30,
+        j.A31 a31
+        from kqmx j where j.FLAG is null
+    </select>
+
+    <update id="updateOAKqJk">
+        update kqmx set FLAG='X',updatetime=#{updatetime};
+    </update>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.TsxmmxMapper">
+    <resultMap id="tsxmMap" type="cc.mrbird.febs.system.domain.Tsxmmx">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <resultMap id="float" type="java.lang.Float">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <resultMap id="employeeMap" type="cc.mrbird.febs.system.domain.Employee">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="findGzxms" resultMap="tsxmMap">
+        select e.employeename,t.* from tsxmmx t left join employee e on t.employeeid=e.employeeid
+        where 1=1
+        <if test="tsxmmx.employeeid != null ">and t.employeeid=#{tsxmmx.employeeid}</if>
+        <if test="tsxmmx.gzxm != null ">and t.gzxm=#{tsxmmx.gzxm}</if>
+    </select>
+
+    <select id="getTotalData" resultMap="float ">
+        select sum(t.je) from tsxmmx t left join employee e on t.employeeid=e.employeeid
+        where 1=1
+        <if test="tsxmmx.employeeid != null ">and t.employeeid=#{tsxmmx.employeeid}</if>
+        <if test="tsxmmx.gzxm != null ">and t.gzxm=#{tsxmmx.gzxm}</if>
+    </select>
+
+    <select id="findEmployeeByCode" resultMap="employeeMap">
+        select e.employeeid,e.idnumber,d.code,e.employeename,c.dept kqdept,c.employeetype  from employee e
+        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        where d.code=#{code}
+    </select>
+</mapper>

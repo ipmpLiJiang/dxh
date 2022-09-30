@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.EmployeeCoreMapper">
+    <resultMap id="employeecoreMap" type="cc.mrbird.febs.system.domain.EmployeeCore">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="getOAEmployeeCore" resultMap="employeecoreMap">
+        select j.ID id,j.RYBH code,j.KSSJ startdate,j.KSID dept,j.BQID ward,
+        j.SJLXID eventtype,j.UPDATETIM xtUpdatedate from hrydxx j where j.FLAG is null
+    </select>
+    <update id="updateOAYdxx">
+        update hrydxx set FLAG='X';
+    </update>
+    <select id="findEmployeeCoreMaxEndDateList" resultMap="employeecoreMap">
+    SELECT
+    o.*
+    FROM
+    ( SELECT employeetype, deptname, ward, max( enddate ) m, employeeid, startdate, enddate FROM
+    employee_core GROUP BY employeeid ) t,
+    employee_core o
+    WHERE
+    t.employeeid = o.employeeid
+    AND t.m = o.enddate
+    </select>
+</mapper>

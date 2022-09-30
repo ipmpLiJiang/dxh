@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.JobTypeMapper">
+    <resultMap id="reportMap" type="cc.mrbird.febs.system.domain.JobType">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="findJobTypeByStartEndDateAndJobType" resultMap="reportMap">
+        select
+            *
+        from
+            job_type
+        where
+            startdate &lt;= #{startdate}
+            and enddate &gt;= #{startdate}
+            <if test="jobtype != null">
+                and jobtype = #{jobtype}
+            </if>
+    </select>
+</mapper>

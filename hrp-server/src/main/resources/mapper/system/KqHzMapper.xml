@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.KqHzMapper">
+    <resultMap id="kkMap" type="cc.mrbird.febs.system.domain.KkList">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <resultMap id="kqHzMap" type="cc.mrbird.febs.system.domain.KqHz">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getKkJkList" resultMap="kkMap" parameterType="kqhz">
+        select e.employeeid,h.id,h.employeename,h.employeecode,h.employeetype,h.dept,h.kqdate,h.shdate,h.idnumber,h.bing,h.shi,h.kong,m.gwgz,m.xjgz,m.wsf,m.jcxjx,
+        h.kk1,h.kk2,h.kk1+h.kk2 sum,h.kqstatus,h.memo
+        from employee e LEFT JOIN kq_hz h on e.idnumber=h.idnumber
+        LEFT JOIN (select e1.employeeid employeeid,e1.idnumber,e1.gwgz,e1.xjgz,e1.wsf,e1.jcxjx,e1.period
+        from (select employeeid,idnumber,max(period) m from emolument GROUP BY employeeid) t,emolument e1
+        where t.employeeid=e1.employeeid and t.m=e1.period)  m on e.idnumber=m.idnumber
+        where h.kqdate=#{kqhz.kqdate}
+        <if test="kqhz.kktype == 1">and (h.bing>0 or h.kong>0)</if>
+        <if test="kqhz.employeeid != null ">and e.employeeid=#{kqhz.employeeid}</if>
+        <if test="kqhz.dept != null ">and h.dept=#{kqhz.dept}</if>
+        <if test="kqhz.kqstatus != null ">and h.kqstatus=#{kqhz.kqstatus}</if>
+        order by h.shi,h.bing desc
+    </select>
+
+    <select id="getSum" resultMap="kqHzMap" parameterType="kqhz">
+        select sum(kk1) kk1,sum(kk2) kk2,sum(kk1)+sum(kk2) sum
+        from employee e LEFT JOIN kq_hz h on e.idnumber=h.idnumber
+        LEFT JOIN (select e1.employeeid employeeid,e1.idnumber,e1.gwgz,e1.xjgz,e1.wsf,e1.jcxjx,e1.period
+        from (select employeeid,idnumber,max(period) m from emolument GROUP BY employeeid) t,emolument e1
+        where t.employeeid=e1.employeeid and t.m=e1.period)  m on e.idnumber=m.idnumber
+        where h.kqdate=#{kqhz.kqdate}
+        <if test="kqhz.kktype == 1">and (h.bing>0 or h.chan>0 or h.shi>0)</if>
+        <if test="kqhz.employeeid != null ">and e.employeeid=#{kqhz.employeeid}</if>
+        <if test="kqhz.dept != null ">and h.dept=#{kqhz.dept}</if>
+        <if test="kqhz.kqstatus != null ">and h.kqstatus=#{kqhz.kqstatus}</if>
+    </select>
+
+    <delete id="deleteByKqdate">
+        delete from kq_hz where kqdate=#{kqdate}
+    </delete>
+
+    <update id="setKK">
+        update kq_hz h
+        left join (select e1.employeeid employeeid,e1.idnumber,e1.gwgz,e1.xjgz,e1.wsf,e1.jcxjx,e1.period
+        from (select employeeid,idnumber,max(period) m from emolument GROUP BY employeeid) t,emolument e1
+        where t.employeeid=e1.employeeid and t.m=e1.period)  m on h.idnumber=m.idnumber
+        set h.kk1=  (m.jcxjx/#{day}*(h.bing)*0.2)+(m.wsf/#{day}*(h.bing)) where h.kqdate=#{kqdate}
+    </update>
+
+    <select id="getHzReport" resultMap="kqHzMap" parameterType="kqhz">
+        select h.*,h.kk1+kk2 sum,e.employeeid from kq_hz h
+        left join employee e on e.idnumber=h.idnumber where 1=1 and (h.bing>0 or h.chan>0 or h.shi>0)
+        <if test="kqhz.startdate !=null">and h.kqdate&gt;=#{kqhz.startdate}</if>
+        <if test="kqhz.enddate !=null"> and h.kqdate&lt;=#{kqhz.enddate}</if>
+        <if test="kqhz.employeeid != null ">and e.employeeid=#{kqhz.employeeid}</if>
+        <if test="kqhz.dept != null and kqhz.dept!=''and kqhz.dept!='undefined'">and h.dept=#{kqhz.dept}</if>
+        <if test="kqhz.employeetype != null ">and h.employeetype=#{kqhz.employeetype}</if>
+        order by h.employeename,h.kqdate
+    </select>
+
+    <select id="getHzSum" resultMap="kqHzMap" parameterType="kqhz">
+        select sum(h.kk1) kk1,sum(h.kk2), sum(h.kk1)+sum(h.kk2) sum from kq_hz h
+        left join employee e on e.idnumber=h.idnumber where 1=1 and (h.bing>0 or h.chan>0 or h.shi>0)
+        <if test="kqhz.startdate !=null">and h.kqdate&gt;=#{kqhz.startdate}</if>
+        <if test="kqhz.enddate !=null"> and h.kqdate&lt;=#{kqhz.enddate}</if>
+        <if test="kqhz.employeeid != null ">and e.employeeid=#{kqhz.employeeid}</if>
+        <if test="kqhz.dept != null and kqhz.dept!=''and kqhz.dept!='undefined'">and h.dept=#{kqhz.dept}</if>
+        <if test="kqhz.employeetype != null ">and h.employeetype=#{kqhz.employeetype}</if>
+        order by h.employeename,h.kqdate
+    </select>
+
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.EventMapper">
+    <resultMap id="eventMap" type="cc.mrbird.febs.system.domain.Event">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="findEventReport" resultMap="eventMap" parameterType="event">
+        select e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.idnumber idnumber,
+        e.birth birth,
+        e.workdate workdate,
+        e.comedate comedate,
+        e.phonenumber phonenumber,
+        e.nation nation,
+        e.homeaddress homeaddress,
+        d.code,
+        t.id,
+        t.dept deptname,
+        t.ward wardname,
+        t.employeetype employeetype,
+        t.rsfw rsfwname,
+        t.rszfw rszfwname,
+        t.status statusname,
+        t.event eventtype,
+        t.eventdate eventdate
+        from employee e
+        left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join (SELECT
+        c.*,
+        v.eventdate,
+        v.EVENT EVENT
+        FROM
+        `event` v
+        LEFT JOIN employee_core c ON c.id = v.coreid
+        ) t on t.employeeid=e.employeeid
+        where 1=1
+        <if test="event.eventstartdate!=null">
+            and t.eventdate >= #{event.eventstartdate,jdbcType=DATE}
+        </if>
+        <if test="event.eventenddate!=null">
+            and t.eventdate &lt;=   #{event.eventenddate,jdbcType=DATE}
+        </if>
+        <if test="event.eventtypes!=null and event.eventtypes!='' and  event.eventtypes.split(',').length>0">
+            and  event in
+            <foreach  item="eventtype" collection="event.eventtypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{eventtype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+</mapper>

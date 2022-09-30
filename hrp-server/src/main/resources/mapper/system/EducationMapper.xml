@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.EducationMapper">
+    <resultMap id="educationMap" type="cc.mrbird.febs.system.domain.Education">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="getOAEducation" resultMap="educationMap">
+        select j.CODE id,j.RYBH code,j.KSSJ startdate,j.XL academic,j.xw degrees,j.BYSJ enddate,j.XLFJ academicpath,j.XLFJMC academicname,j.XWFJ degreespath,j.XWFJMC degreesname,j.XXXS studymethod,
+         j.BYXX school,j.ZY profession,j.DS tutor,j.CZLX operation,j.XLZSDZBAMC xlzsdzbaname, j.XLZSDZBA xlzsdzbapath,j.UPDATETIME xtUpdatedate,if(j.SFZQXL='是',1,0) zqflag from hrjyxx j where j.FLAG is null
+    </select>
+
+    <update id="updateOAEducation">
+        update hrjyxx set FLAG='X';
+    </update>
+    <delete id="deleteByEmployeeids">
+        delete from education where employeeid in
+        <foreach  item="employeeid" collection="employeeids" index="index" open="(" close=")" separator=",">
+            #{employeeid,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+</mapper>

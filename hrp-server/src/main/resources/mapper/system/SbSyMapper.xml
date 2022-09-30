@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.SbSyMapper">
+    <resultMap id="reportMap" type="cc.mrbird.febs.system.domain.SbReport">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <resultMap id="SbSy" type="cc.mrbird.febs.system.domain.SbSy">
+
+    </resultMap>
+    <select id="getReport" resultMap="reportMap" parameterType="java.util.Date">
+        select #{thismonth} shdate,
+        count(case when shdate=#{thismonth} and jftype=1 then 1 end) byyjcount,
+        count(case when shdate=#{lastmonth} and jftype=1 then 1 end) syyjcount,
+        ifnull(SUM(case when jftype=1 and shdate=#{thismonth} then yj end) ,0) yjsum,ifnull(SUM(case when jftype=1 and shdate=#{thismonth} then dw end),0) dwyjsum,ifnull(SUM(case when jftype=1 and shdate=#{thismonth} then gr end),0) gryjsum,
+        IFNULL(SUM(case when jftype=2 and shdate=#{thismonth} then yj end) ,0) bjsum,IFNULL(SUM(case when jftype=2 and shdate=#{thismonth} then dw end),0) dwbjsum,IFNULL(SUM(case when jftype=2 and shdate=#{thismonth} then gr end),0) grbjsum,
+        COUNT(case when shdate=#{thismonth} and jftype=2 then 1 end) bjcount,3 bxtype from sb_sy
+    </select>
+    <select id="getHistoryList1" resultMap="SbSy" parameterType="sbReport">
+        select s.*,3 bxtype, d.employeecode ,f.employeetype,f.deptname from  sb_sy s
+        left join employee e on e.idnumber=s.idnumber
+        left join (select c.* from (select employeeid ,employeecode ,max(enddate) m from code GROUP BY employeeid)t,CODE c where t.employeeid=c.employeeid and t.m=c.enddate) d on e.employeeid=d.employeeid and d.startdate&lt;=s.paydate and d.enddate&gt;=s.paydate
+        left join (select o.* from (select employeetype ,deptname,ward,max(enddate) m,employeeid,startdate,enddate from employee_core GROUP BY employeeid)t,employee_core o where t.employeeid=o.employeeid and t.m=o.enddate) f on e.employeeid=f.employeeid and f.startdate&lt;=s.paydate and f.enddate&gt;=s.paydate
+        where 1=1
+        <if test="sbReport.jftype != null">and s.jftype=#{sbReport.jftype}</if>
+        <if test="sbReport.employeename != null">and e.employeename like concat('%',#{sbReport.employeename},'%')</if>
+        <if test="sbReport.startdate!=null ">and s.shdate &gt;= #{sbReport.startdate}</if>
+        <if test="sbReport.enddate!=null ">and s.shdate &lt;= #{sbReport.enddate}</if>
+        order by s.paydate
+    </select>
+
+    <select id="getHistoryList" resultMap="SbSy" parameterType="sbReport">
+        select s.*,3 bxtype,e.employeeid from  sb_sy s
+        left join employee e on e.idnumber=s.idnumber
+        where 1=1
+        <if test="sbReport.jftype != null">and s.jftype=#{sbReport.jftype}</if>
+        <if test="sbReport.employeename != null">and e.employeename like concat('%',#{sbReport.employeename},'%')</if>
+        <if test="sbReport.startdate!=null ">and s.shdate &gt;= #{sbReport.startdate}</if>
+        <if test="sbReport.enddate!=null ">and s.shdate &lt;= #{sbReport.enddate}</if>
+        order by s.paydate
+    </select>
+
+    <delete id="deleteByDate" parameterType="java.util.Date">
+        delete from sb_sy where shdate=#{shdate}
+    </delete>
+
+
+    <select id="getSyXzByInidnumberAndShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{bshdate}
+        and s.jftype = 1
+        AND s.idnumber NOT IN ( SELECT idnumber FROM sb_sy WHERE shdate = #{ushdate} and jftype = 1 )
+    </select>
+    <select id="getJsByInidnumberAndShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{ushdate}
+        and s.jftype = 1
+        AND s.idnumber NOT IN ( SELECT idnumber FROM sb_sy WHERE shdate = #{bshdate} and jftype = 1 )
+    </select>
+    <select id="getBjByShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{bshdate}
+        AND s.jftype = 2
+    </select>
+
+
+    <select id="getXzByInidnumberAndShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{bshdate}
+        and s.jftype = 1
+        AND s.idnumber NOT IN ( SELECT idnumber FROM sb_sy WHERE shdate = #{ushdate} and jftype = 1 )
+    </select>
+
+    <select id="getYlJsByInidnumberAndShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{ushdate}
+        and s.jftype = 1
+        AND s.idnumber NOT IN ( SELECT idnumber FROM sb_sy WHERE shdate = #{bshdate} and jftype = 1 )
+    </select>
+
+    <select id="getYlBjByShDateList" resultMap="SbSy">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        sb_sy s
+        left join employee e on
+        s.idnumber = e.idnumber
+        WHERE
+        s.shdate = #{bshdate}
+        AND s.jftype = 2
+    </select>
+
+    <select id="getSyByIdNumberNotEmolumentList" resultMap="SbSy" >
+        select * from sb_sy where shdate=#{shdate}
+        <if test="jftype != null">and jftype=#{jftype}</if>
+        and idnumber not in (
+            select idnumber from emolument where period=#{shdate}
+        )
+    </select>
+</mapper>

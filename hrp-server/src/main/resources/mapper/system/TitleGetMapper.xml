@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.TitleGetMapper">
+    <resultMap id="titleGetMap" type="cc.mrbird.febs.system.domain.TitleGet">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getOATitleGet" resultMap="titleGetMap">
+        select j.RYBH code,j.CODE id,j.QDSJ startdate,j.ZC title,j.ZYJSZW duty,j.ZSBH number,j.ZSFJ certificatepath,j.FJMC certificatename,
+         j.CZLX operation,j.UPDATETIM xtUpdatedate from hrqdzc j where j.FLAG is null
+    </select>
+
+    <update id="updateOATitleGet">
+        update hrqdzc set FLAG='X';
+    </update>
+
+    <delete id="deleteByEmployeeids">
+        delete from title_get where employeeid in
+        <foreach  item="employeeid" collection="employeeids" index="index" open="(" close=")" separator=",">
+            #{employeeid,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+
+    <select id="findTitleGetByMaxStartDate" resultMap="titleGetMap">
+        SELECT
+            title_get.*
+        FROM
+            ( SELECT employeeid, max( startdate ) startdate FROM title_get GROUP BY employeeid ) tgg,
+            title_get
+        WHERE
+            tgg.employeeid = title_get.employeeid
+            AND tgg.startdate = title_get.startdate
+    </select>
+</mapper>

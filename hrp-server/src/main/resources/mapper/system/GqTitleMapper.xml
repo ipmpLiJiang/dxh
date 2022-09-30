@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.GqTitleMapper">
+    <resultMap id="gqTitleMap" type="cc.mrbird.febs.system.domain.GqTitle">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getOAGqTitle" resultMap="gqTitleMap">
+        select j.RYBH code,j.CODE id,j.QDSJ startdate,j.QDDJ  getlevel,j.QDSJ getdate,j.ZSBH number,j.ZSFJ certificatepath,j.ZSFJMC certificatename,
+         j.UPDATETIME xtUpdatedate from hrgqdj j where j.FLAG is null
+    </select>
+    <update id="updateOAGqTitle">
+        update hrgqdj set FLAG='X';
+    </update>
+    <delete id="deleteByEmployeeids">
+        delete from gq_title where employeeid in
+        <foreach  item="employeeid" collection="employeeids" index="index" open="(" close=")" separator=",">
+            #{employeeid,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+</mapper>

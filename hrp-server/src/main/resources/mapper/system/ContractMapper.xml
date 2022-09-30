@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.ContractMapper">
+    <resultMap id="contractMap" type="cc.mrbird.febs.system.domain.Contract">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <insert id="addOAContracts" parameterType="contract">
+        INSERT INTO `hrht`(id,rybh,kssj,jssj,htlx,czsj) VALUES (#{contract.id},#{contract.code}, #{contract.startdate}, #{contract.enddate}, #{contract.contracttype}, #{contract.xtUpdatedate});
+    </insert>
+    <update id="updateOAContracts" parameterType="contract">
+        update hrht set kssj=#{contract.startdate},jssj=#{contract.enddate},htlx=#{contract.contracttype},czsj =#{contract.xtUpdatedate}
+        where id= #{contract.id}
+    </update>
+
+    <select id="findContractReport"  resultMap="contractMap" parameterType="contract">
+        SELECT
+        e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.kqdept kqdept,
+        c.dept deptname,
+        c.ward wardname,
+        c.employeetype employeetype,
+        c.rsfw rsfwname,
+        c.rszfw rszfwname,
+        d.employeecode CODE,
+        n.startdate,
+        n.enddate,
+        n.contracttype,
+        n.memo
+        FROM
+        ( SELECT * FROM employee_core WHERE 1 = 1
+        <if test="contract.deptids!=null and contract.deptids!=''and  contract.deptids.split(',').length>0">
+            and  dept in
+            <foreach  item="deptid" collection="contract.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" contract.inputdate != null">
+        AND startdate <![CDATA[ <= ]]> #{contract.inputdate} AND enddate <![CDATA[ >= ]]> #{contract.inputdate}
+        </if>
+        ) c
+        LEFT JOIN employee e ON ( e.employeeid = c.employeeid )
+        LEFT JOIN ( SELECT * FROM CODE WHERE 1 = 1
+        <if test=" contract.inputdate != null">
+        AND startdate <![CDATA[ <= ]]> #{contract.inputdate}  AND enddate <![CDATA[ >= ]]> #{contract.inputdate}
+        </if>
+        ) d ON ( c.employeeid = d.employeeid )
+        LEFT JOIN (
+        select n1.employeeid,n1.startdate, n1.enddate, n1.contracttype,n1.memo from
+        ( SELECT employeeid, max( enddate ) enddate FROM contract GROUP BY employeeid ) t,
+        contract n1 where t.employeeid = n1.employeeid and t.enddate = n1.enddate
+        ) n ON ( e.employeeid = n.employeeid )
+        WHERE
+        1=1
+        <if test=" contract.employeeid != null">
+            and e.employeeid = #{ contract.employeeid }
+        </if>
+        <if test=" contract.employeename != null">
+            and e.employeename = #{ contract.employeename }
+        </if>
+        <if test=" contract.startdate != null and contract.enddate != null">
+        and n.enddate <![CDATA[ >= ]]> #{ contract.startdate } and n.enddate <![CDATA[ <= ]]> #{ contract.enddate }
+        </if>
+    </select>
+</mapper>

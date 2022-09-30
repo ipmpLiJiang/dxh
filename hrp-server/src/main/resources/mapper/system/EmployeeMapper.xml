@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.EmployeeMapper">
+    <resultMap id="employeeMap" type="cc.mrbird.febs.system.domain.Employee">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="findEmployeeBySearch" resultMap="employeeMap">
+        select e.*,d.employeecode code
+        from employee e
+        left join (select c.* from (select employeeid ,employeecode ,max(enddate) m from code GROUP BY employeeid)t,CODE c where t.employeeid=c.employeeid and t.m=c.enddate) d on e.employeeid=d.employeeid
+        where 1=1
+        <if test="search != 'null' and search != 'undefined' and search != null and search !=''"> and  e.employeename like concat('%',#{search},'%') </if>
+    </select>
+
+    <select id="findEmployeeById" resultMap="employeeMap">
+        select e.employeeid,e.employeename,e.birth,e.idnumber,e.gender,d.code   from employee e
+        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        where e.employeeid=#{id}
+    </select>
+    <select id="deptFindEmployeeList" resultMap="employeeMap">
+        select e.employeeid,e.idnumber,d.code,e.employeename,e.kqdept kqdept,c.rszfw,c.status statusname  from employee e
+        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        where 1=1 and (c.status=1 or c.status=3)
+        <if test="employee.employeeid !=null and employee.employeeid!=''">
+            and e.employeeid=#{employee.employeeid}
+        </if>
+        <if test="employee.kqdept!=null" >
+            and e.kqdept=#{employee.kqdept}
+        </if>
+    </select>
+    <select id="getEmployeeByKqDept" resultMap="employeeMap">
+        select DISTINCT e.employeeid,e.employeename,e.idnumber,d.code,c.employeetype,c.rsfw,c.rszfw from employee e
+        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid and ((c.startdate &lt;= #{startDate} and c.enddate&gt;=#{startDate}) or (c.startdate &lt;= #{endDate} and c.enddate&gt;=#{endDate}))
+        <if test="rszfws!=null and rszfws!='' and  rszfws.split(',').length>0">
+            and  c.rszfw in
+            <foreach  item="rszfw" collection="rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        where e.kqdept=#{kqDept} and (c.status=1 or c.status=3)
+    </select>
+    <select id="findEmployeeByCode" resultMap="employeeMap">
+        select e.employeeid,e.idnumber,d.code,e.employeename,c.dept kqdept,c.employeetype,c.rsfw,c.rszfw  from employee e
+        LEFT JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        where d.code=#{code} and (c.status=1 or c.status=3)
+    </select>
+
+    <select id="findEmployeeReport" resultMap="employeeMap" parameterType="employee">
+        select  e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.idnumber idnumber,
+        e.birth birth,
+        e.nation nation,
+        e.homeaddress homeaddress,
+        e.phonenumber phonenumber,
+        e.politicaloutlook politicaloutlookname,
+        e.kqdept kqdept,
+        c.dept deptname,
+        c.ward wardname,
+        c.job job,
+        c.employeetype employeetype,
+        c.rsfw rsfwname,
+        c.rszfw rszfwname,
+        c.status statusname,
+        c.startdate startdate,
+        c.enddate enddate,
+        d.employeecode code,
+        u.ac academicname,
+        u.s1 academicschool,
+        u.sm academicstudymethod,
+        u.p1 academicprofession,
+        u.enddate academicenddate,
+        u.de degreesname,
+        u.s2 degreesschool,
+        u.p2 degreesprofession,
+        u.sm2 degreesstudymethod,
+        u.enddate2 degreesenddate,
+        uu.ac zqacademicname,
+        uu.s1 zqacademicschool,
+        uu.p1 zqacademicprofession,
+        uu.sm zqacademicstudymethod,
+        uu.enddate zqacademicenddate,
+        uu.de zqdegreesname,
+        uu.s2 zqdegreesschool,
+        uu.p2 zqdegreesprofession,
+        uu.sm2 zqdegreesstudymethod,
+        uu.enddate2 zqdegreesenddate,
+        e.comedate comedate,
+        e.workdate workdate,
+        n.startdate contractstartdate,
+        n.enddate contractenddate,
+        t.title titlename,
+        t.duty dutyname,
+        g.title qdtitlename,
+        g.duty qddutyname,
+        g.startdate qddate,
+        j.joblevel technicallevelname,
+        j2.joblevel mangelevelname,
+        j3.joblevel workerlevelname
+        from (select * from employee_core where 1=1
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+
+        <if test="employee.states!=null and employee.states!='' and  employee.states.split(',').length>0">
+            and  status in
+            <foreach  item="state" collection="employee.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{state,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.rsfws!=null and employee.rsfws!='' and  employee.rsfws.split(',').length>0">
+            and  rsfw in
+            <foreach  item="rsfw" collection="employee.rsfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rsfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.rszfws!=null and employee.rszfws!='' and  employee.rszfws.split(',').length>0">
+            and  rszfw in
+            <foreach  item="rszfw" collection="employee.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" employee.startdate != null">
+            and   startdate &lt;= #{employee.startdate} and enddate &gt;= #{employee.startdate}
+        </if>
+        ) c
+        left join employee e on (e.employeeid=c.employeeid)
+
+        left join (select * from code where 1=1
+        <if test="employee.startdate!=null">
+            and startdate &lt;= #{employee.startdate} and enddate&gt;= #{employee.startdate}
+        </if>) d on (c.employeeid=d.employeeid)
+
+        left join (select DISTINCT  u1.employeeid employeeid,u1.academic ac,u1.profession p1,u1.studymethod sm,u1.school  s1,u1.enddate enddate,y.degrees de,y.profession p2,y.studymethod sm2,y.school s2,y.enddate enddate2  from
+        (select employeeid,max(academic) m from education  GROUP BY employeeid) t,education u1
+        left JOIN
+        (select u2.* from (select employeeid,max(degrees) m from education  GROUP BY employeeid) t,education u2 where t.employeeid=u2.employeeid and t.m=u2.degrees group by u2.employeeid) y
+        on u1.employeeid=y.employeeid where t.employeeid=u1.employeeid and t.m=u1.academic group by u1.employeeid) u on (e.employeeid =u.employeeid)
+
+        left join (select DISTINCT u1.employeeid employeeid,u1.academic ac,u1.studymethod sm,u1.profession p1,u1.school s1,u1.enddate enddate,y.degrees de,y.studymethod sm2,y.profession p2,y.school s2,y.enddate enddate2 from
+        (select employeeid,max(academic) m from education where zqflag=1 GROUP BY employeeid) t,education u1
+        left JOIN (select  u2.* from (select  employeeid, max(degrees) m from education  where zqflag=1 GROUP BY employeeid) t,education u2 where t.employeeid=u2.employeeid and t.m=u2.degrees group by u2.employeeid)
+        y on u1.employeeid=y.employeeid where t.employeeid=u1.employeeid and t.m=u1.academic group by u1.employeeid) uu on (e.employeeid =uu.employeeid)
+
+        left join (
+            select t.employeeid,t.startdate,t1.enddate from (
+                SELECT employeeid, min( startdate ) startdate FROM contract GROUP BY employeeid
+            ) t left join ( SELECT employeeid, max( enddate ) enddate FROM contract GROUP BY employeeid ) t1 on
+            t.employeeid = t1.employeeid
+        ) n on (e.employeeid =n.employeeid)
+
+        left join title t on c.employeeid=t.employeeid
+        <if test=" employee.startdate != null">
+            and  t.startdate &lt;= #{employee.startdate} and t.enddate &gt;= #{employee.startdate}
+        </if>
+
+        left join (select DISTINCT t1.title,t1.duty,t1.employeeid,t1.startdate
+        from (select employeeid,min(title) m from title_get GROUP BY employeeid)t,title_get t1
+        where t.employeeid=t1.employeeid and t.m=t1.title
+        <if test=" employee.startdate != null">
+        and  t1.startdate &lt;= #{employee.startdate}
+        </if> GROUP BY t1.employeeid  ORDER BY startdate  desc ) g on (c.employeeid=g.employeeid)
+
+        left join job_type j on c.employeeid = j.employeeid
+        and j.jobtype=1001
+        <if test=" employee.startdate != null">
+            and  j.startdate &lt;= #{employee.startdate} and j.enddate &gt;= #{employee.startdate}
+        </if>
+
+        left join job_type j2 on c.employeeid = j2.employeeid
+        and j2.jobtype=1002
+        <if test=" employee.startdate != null">
+            and  j2.startdate &lt;= #{employee.startdate} and j2.enddate &gt;= #{employee.startdate}
+        </if>
+
+
+        left join  job_type j3 on c.employeeid = j3.employeeid
+        and j3.jobtype=1003
+        <if test=" employee.startdate != null">
+            and  j3.startdate &lt;= #{employee.startdate} and j3.enddate &gt;= #{employee.startdate}
+        </if>
+        where 1=1
+
+        <if  test="employee.employeeid != null">
+            and  c.employeeid = #{employee.employeeid}
+        </if>
+        <if test=" employee.joblevel != null">
+            and  (j.joblevel = #{employee.joblevel} or j2.joblevel = #{employee.joblevel} or j3.joblevel = #{employee.joblevel})
+        </if>
+        <if  test="employee.titleget != null">
+            and  g.title = #{employee.titleget}
+        </if>
+        <if  test="employee.academic != null">
+            and  u.ac = #{employee.academic}
+        </if>
+        <if  test="employee.degree != null">
+            and  u.de = #{employee.degree}
+        </if>
+        <if  test="employee.zqacademic != null">
+            and  uu.ac = #{employee.zqacademic}
+        </if>
+        <if  test="employee.zqdegree != null">
+            and  uu.de = #{employee.zqdegree}
+        </if>
+        <if  test="employee.birthstartdate != null">
+            and  e.birth &gt;= #{employee.birthstartdate}
+        </if>
+        <if  test="employee.birthenddate != null">
+            and  e.birth &lt;= #{employee.birthenddate}
+        </if>
+        <if  test="employee.title != null">
+            and  t.title = #{employee.title}
+        </if>
+    </select>
+
+    <update id="updateEmolumentStatus" parameterType="java.util.List">
+        update employee set emolumentstatus=#{state,jdbcType=BIGINT} where employeeid in
+        <foreach  item="id" collection="ids" index="index" open="(" close=")" separator=",">
+            #{id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <select id="getOAEmployee" resultMap="employeeMap">
+        select j.RYBH code,j.JG homeaddress,j.MZ nation,j.SJH phonenumber,j.CJGZSJ workdate,
+        j.ZZMM politicaloutlook,j.RDSJ rddate,j.RTSJ rtdate,j.UPDATETIME xtUpdatedate from hrjcxx j where j.FLAG is null
+    </select>
+
+    <select id="getAttandUser" resultMap="employeeMap" parameterType="employee">
+        select employee.employeeid,employee.employeename,code.employeecode code
+        ,d1.valuee retirefilenum,d2.valuee deathfilenum
+        from employee
+        inner join code on employee.employeeid=code.employeeid
+        inner join employee_core
+        on employee.employeeid =employee_core.employeeid
+        and STR_TO_DATE(#{employee.startdate},'%Y-%m-%d') <![CDATA[>=]]> STR_TO_DATE(employee_core.startdate,'%Y-%m-%d')  and
+        STR_TO_DATE(#{employee.startdate},'%Y-%m-%d') <![CDATA[<=]]> STR_TO_DATE(employee_core.enddate,'%Y-%m-%d') and employee_core.status =1
+        LEFT JOIN department d1 on employee_core.ward=d1.keyy
+        LEFT JOIN department d2 on employee_core.dept=d2.keyy
+        where 1=1
+<!--        <if test="employee.deptname !=null and employee.deptname!=''">-->
+<!--            and (employee_core.dept=#{employee.deptname}  )-->
+<!--        </if>-->
+        <if test="employee.employeeid !=null and employee.employeeid!=''">
+            and (employee.employeeid=#{employee.employeeid}  or employee.employeename like CONCAT('%',#{employee.employeeid} ,'%') )
+        </if>
+    </select>
+    <update id="updateOAEmployee">
+        update hrjcxx set FLAG='X';
+    </update>
+
+    <insert id="addOAEmployee" parameterType="employee">
+        INSERT INTO `hrzsj` VALUES (#{employee.idnumber},#{employee.employeeid},#{employee.code}, #{employee.employeename}, #{employee.deptname}, #{employee.job}, #{employee.position},#{employee.xtUpdatedate},#{employee.state},0,0,#{employee.rsfwname},#{employee.rszfwname},#{employee.xtUpdatedate},#{employee.birth})
+    </insert>
+
+    <select id="findEmployeeReport3" resultMap="employeeMap" parameterType="employee">
+        select  e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.idnumber idnumber,
+        e.birth birth,
+        e.nation nation,
+        e.homeaddress homeaddress,
+        e.phonenumber phonenumber,
+        e.politicaloutlook politicaloutlookname,
+        e.kqdept kqdept,
+        c.dept deptname,
+        c.ward wardname,
+        c.job job,
+        c.employeetype employeetype,
+        c.rsfw rsfwname,
+        c.rszfw rszfwname,
+        c.status statusname,
+        c.startdate startdate,
+        c.enddate enddate,
+        d.employeecode code,
+        e.comedate comedate,
+        e.workdate workdate
+        from (select * from employee_core where 1=1
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+
+        <if test="employee.states!=null and employee.states!='' and  employee.states.split(',').length>0">
+            and  status in
+            <foreach  item="state" collection="employee.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{state,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.rsfws!=null and employee.rsfws!='' and  employee.rsfws.split(',').length>0">
+            and  rsfw in
+            <foreach  item="rsfw" collection="employee.rsfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rsfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.rszfws!=null and employee.rszfws!='' and  employee.rszfws.split(',').length>0">
+            and  rszfw in
+            <foreach  item="rszfw" collection="employee.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" employee.startdate != null">
+            and   startdate &lt;= #{employee.startdate} and enddate &gt;= #{employee.startdate}
+        </if>
+        ) c
+        left join employee e on (e.employeeid=c.employeeid)
+
+        left join (select * from code where 1=1
+        <if test="employee.startdate!=null">
+            and startdate &lt;= #{employee.startdate} and enddate&gt;= #{employee.startdate}
+        </if>) d on (c.employeeid=d.employeeid)
+        where 1=1
+        <if  test="employee.employeeid != null">
+            and  c.employeeid = #{employee.employeeid}
+        </if>
+    </select>
+    <select id="findEmployeeAgeTitleReport" resultMap="employeeMap" parameterType="employee">
+        SELECT
+        c.employeeid,
+        c.rszfw,
+        e.birth,
+        t.title
+        FROM
+        employee_core c
+        INNER JOIN employee e ON e.employeeid = c.employeeid
+        INNER JOIN (
+            select employeeid,title from title where startdate &lt;= #{employee.startdate} and enddate&gt;= #{employee.startdate}
+        ) t ON t.employeeid = c.employeeid
+        where
+        c.startdate &lt;= #{employee.startdate} and c.enddate&gt;= #{employee.startdate}
+        <if test="employee.rsfw!=null">
+        AND c.rsfw = #{employee.rsfw}
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findEmployeeTitleGetReport" resultMap="employeeMap" parameterType="employee">
+        SELECT
+        c.employeeid,
+        c.rszfw,
+        tg.title titleget
+        FROM
+        employee_core c
+        INNER JOIN employee e ON e.employeeid = c.employeeid
+        INNER JOIN (
+            select title_get.employeeid,title_get.title from (
+                select employeeid,max(startdate) startdate from title_get group by employeeid
+            ) tgg,title_get where tgg.employeeid = title_get.employeeid and tgg.startdate = title_get.startdate
+        ) tg on tg.employeeid = c.employeeid
+        WHERE
+        c.startdate &lt;= #{employee.startdate} and c.enddate&gt;= #{employee.startdate}
+        <if test="employee.rsfw!=null">
+            AND c.rsfw = #{employee.rsfw}
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findEmployeeBirthEducationReport" resultMap="employeeMap" parameterType="employee">
+        SELECT
+        c.employeeid,
+        c.rsfw,
+        e.birth,
+        u.academic
+        FROM
+        employee_core c
+        INNER JOIN employee e ON e.employeeid = c.employeeid
+        INNER JOIN (
+            SELECT
+                u1.employeeid,
+                u1.academic
+            FROM
+                ( SELECT employeeid, max( academic ) m FROM education GROUP BY employeeid ) t,
+                education u1
+            WHERE
+                t.employeeid = u1.employeeid
+                AND t.m = u1.academic
+            GROUP BY
+                u1.employeeid
+        ) u ON  e.employeeid = u.employeeid
+        WHERE
+        c.startdate &lt;= #{employee.startdate} and c.enddate&gt;= #{employee.startdate}
+        <if test="employee.rsfw!=null">
+            AND c.rsfw = #{employee.rsfw}
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findEmployeeJoinReport" resultMap="employeeMap" parameterType="employee">
+        SELECT
+        c.employeeid,
+        c.rszfw,
+        e.birth
+        FROM
+        employee_core c
+        INNER JOIN employee e ON e.employeeid = c.employeeid
+        WHERE
+        c.startdate &lt;= #{employee.startdate} and c.enddate&gt;= #{employee.startdate}
+        <if test="employee.rsfw!=null">
+            AND c.rsfw = #{employee.rsfw}
+        </if>
+        <if test="employee.employeetypes!=null and employee.employeetypes!='' and  employee.employeetypes.split(',').length>0">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="employee.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="employee.deptids!=null and employee.deptids!=''and  employee.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="deptid" collection="employee.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+</mapper>

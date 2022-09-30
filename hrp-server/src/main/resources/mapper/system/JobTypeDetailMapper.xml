@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.JobTypeDetailMapper">
+    <resultMap id="jobTypeMap" type="cc.mrbird.febs.system.domain.JobTypeDetail">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getOAJobTypeDetail" resultMap="jobTypeMap">
+        select DISTINCT v.id keyy,v.name valuee from ORG_POST_VIEW v
+    </select>
+
+    <delete id="deleteAll" >
+       delete from job_type_detail;
+    </delete>
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.CheckMapper">
+
+    <resultMap id="checkMap" type="cc.mrbird.febs.system.domain.Checkinfo">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="findCheckinfoReport"  resultMap="checkMap" >
+        SELECT
+        e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.kqdept kqdept,
+        c.dept deptname,
+        c.ward wardname,
+        c.employeetype employeetype,
+        c.rsfw rsfwname,
+        c.rszfw rszfwname,
+        d.employeecode CODE,
+        n.year,
+        n.result,
+        n.memo
+        FROM
+        ( SELECT * FROM employee_core WHERE 1 = 1
+        <if test="check.deptids!=null and check.deptids!=''and  check.deptids.split(',').length>0">
+            and  dept in
+            <foreach  item="deptid" collection="check.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" check.inputdate != null">
+            AND startdate <![CDATA[ <= ]]> #{check.inputdate} AND enddate <![CDATA[ >= ]]> #{check.inputdate}
+        </if>
+        ) c
+        LEFT JOIN employee e ON ( e.employeeid = c.employeeid )
+        LEFT JOIN ( SELECT * FROM CODE WHERE 1 = 1
+        <if test=" check.inputdate != null">
+            AND startdate <![CDATA[ <= ]]> #{check.inputdate}  AND enddate <![CDATA[ >= ]]> #{check.inputdate}
+        </if>
+        ) d ON ( c.employeeid = d.employeeid )
+        LEFT JOIN checkinfo n ON ( e.employeeid = n.employeeid )
+        WHERE
+        1=1
+        <if test=" check.employeeid != null">
+            and e.employeeid = #{ check.employeeid }
+        </if>
+        <if test=" check.employeename != null">
+            and e.employeename = #{ check.employeename }
+        </if>
+        <if test=" check.result != null">
+            and n.result = #{ check.result }
+        </if>
+        <if test=" check.startdate != null and check.enddate != null">
+            and n.year <![CDATA[ >= ]]> #{ check.startdate } and n.year <![CDATA[ <= ]]> #{ check.enddate }
+        </if>
+    </select>
+
+    <select id="findCheckinfoReport2"  resultMap="checkMap" >
+        SELECT
+        e.employeeid employeeid,
+        e.employeename employeename,
+        e.gender gender,
+        e.kqdept kqdept,
+        c.dept deptname,
+        c.ward wardname,
+        c.employeetype employeetype,
+        c.rsfw rsfwname,
+        c.rszfw rszfwname,
+        d.employeecode CODE,
+        n.year,
+        n.result,
+        n.memo
+        FROM
+        ( SELECT * FROM employee_core WHERE 1 = 1
+        <if test="deptids!=null and deptids!=''and  deptids.split(',').length>0">
+            and  dept in
+            <foreach  item="deptid" collection="deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{deptid,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" inputdate != null">
+            AND startdate <![CDATA[ <= ]]> #{inputdate} AND enddate <![CDATA[ >= ]]> #{inputdate}
+        </if>
+        ) c
+        LEFT JOIN employee e ON ( e.employeeid = c.employeeid )
+        LEFT JOIN ( SELECT * FROM CODE WHERE 1 = 1
+        <if test=" inputdate != null">
+            AND startdate <![CDATA[ <= ]]> #{inputdate}  AND enddate <![CDATA[ >= ]]> #{inputdate}
+        </if>
+        ) d ON ( c.employeeid = d.employeeid )
+        LEFT JOIN checkinfo n ON ( e.employeeid = n.employeeid )
+        WHERE
+        1=1
+        <if test=" employeeid != null">
+            and e.employeeid = #{ employeeid }
+        </if>
+        <if test=" employeename != null">
+            and e.employeename = #{ employeename }
+        </if>
+        <if test=" result != null">
+            and n.result = #{ result }
+        </if>
+        <if test=" startdate != null and enddate != null">
+            and n.year <![CDATA[ >= ]]> #{ startdate } and n.year <![CDATA[ <= ]]> #{ enddate }
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.FamilyMapper">
+    <resultMap id="familyMap" type="cc.mrbird.febs.system.domain.Family">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getOAFamily" resultMap="familyMap">
+        select j.CODE id,j.RYBH code,j.CW cw,j.XM name,j.XB gender,j.CSRQ birth,j.DWZW job,
+         j.SJH tel,j.CZLX operation,j.UPDATETIME xtUpdatedate from hrjtcy j where j.FLAG is null
+    </select>
+
+    <update id="updateOAFamily">
+        update hrjtcy set FLAG='X';
+    </update>
+
+    <delete id="deleteByEmployeeids">
+        delete from family where employeeid in
+        <foreach  item="employeeid" collection="employeeids" index="index" open="(" close=")" separator=",">
+            #{employeeid,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+</mapper>

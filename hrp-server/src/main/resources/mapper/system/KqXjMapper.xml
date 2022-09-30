@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.KqXjMapper">
+    <resultMap id="xjMap" type="cc.mrbird.febs.system.domain.KqXj">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="getOAXj" resultMap="xjMap">
+        select j.RYBH employeecode,j.KSSJ startdate,j.JSSJ enddate,j.QJLX xjtype from hrqjxx j where j.FLAG is null
+    </select>
+
+    <update id="updateOAXj">
+        update hrqjxx set FLAG='X';
+    </update>
+</mapper>

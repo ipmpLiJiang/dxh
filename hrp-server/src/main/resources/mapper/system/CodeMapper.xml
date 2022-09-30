@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.CodeMapper">
+
+    <resultMap id="codeMap" type="cc.mrbird.febs.system.domain.Code">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+
+    <select id="findCodeMaxEndDateList" resultMap="codeMap">
+        SELECT
+			c.*
+		FROM
+			( SELECT employeeid, employeecode, max( enddate ) m FROM CODE GROUP BY employeeid ) t,
+			CODE c
+		WHERE
+			t.employeeid = c.employeeid
+			AND t.m = c.enddate
+    </select>
+</mapper>

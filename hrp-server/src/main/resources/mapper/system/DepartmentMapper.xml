@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.DepartmentMapper">
+    <resultMap id="departmentMap" type="cc.mrbird.febs.system.domain.Department">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <delete id="deleteAll" >
+       delete from department;
+    </delete>
+
+    <select id="getOADept" resultMap="departmentMap">
+        SELECT DISTINCT u.id keyy,u.name valuee,u.path,u.code from ORG_UNIT_VIEW u;
+    </select>
+
+    <insert id="createDepartmentToCw" parameterType="department">
+        insert into HR_Department values(#{department.keyy},#{department.valuee},#{department.code},#{department.path},#{department.dj})
+    </insert>
+    <delete id="deleteDepartment">
+        delete HR_Department;
+    </delete>
+</mapper>

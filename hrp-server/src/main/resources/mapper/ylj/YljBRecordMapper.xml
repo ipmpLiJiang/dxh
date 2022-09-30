@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.ylj.dao.YljBRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cc.mrbird.febs.ylj.entity.YljBRecord">
+        <id column="id" property="id"/>
+        <result column="grbh" property="grbh"/>
+        <result column="user_name" property="userName"/>
+        <result column="id_card" property="idCard"/>
+        <result column="fkssq" property="fkssq"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="jflx" property="jflx"/>
+        <result column="jfjshj" property="jfjshj"/>
+        <result column="yldwjf" property="yldwjf"/>
+        <result column="ylgrjf" property="ylgrjf"/>
+        <result column="yldwlx" property="yldwlx"/>
+        <result column="ylgrlx" property="ylgrlx"/>
+        <result column="ylxj" property="ylxj"/>
+        <result column="njdwjfxz" property="njdwjfxz"/>
+        <result column="njdwjfsz" property="njdwjfsz"/>
+        <result column="njgrjf" property="njgrjf"/>
+        <result column="dwxzxl" property="dwxzxl"/>
+        <result column="dwszlx" property="dwszlx"/>
+        <result column="grlx" property="grlx"/>
+        <result column="zsje" property="zsje"/>
+        <result column="njxj" property="njxj"/>
+        <result column="dwyjhj" property="dwyjhj"/>
+        <result column="gryjhj" property="gryjhj"/>
+        <result column="zj" property="zj"/>
+        <result column="state" property="state"/>
+        <result column="IS_DELETEMARK" property="isDeletemark"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="MODIFY_TIME" property="modifyTime"/>
+        <result column="CREATE_USER_ID" property="createUserId"/>
+        <result column="MODIFY_USER_ID" property="modifyUserId"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, grbh, user_name, id_card, fkssq, start_date, end_date, jflx, jfjshj, yldwjf, ylgrjf, yldwlx, ylgrlx, ylxj, njdwjfxz, njdwjfsz, njgrjf, dwxzxl, dwszlx, grlx, zsje, njxj, dwyjhj, gryjhj, zj, state, IS_DELETEMARK, CREATE_TIME, MODIFY_TIME, CREATE_USER_ID, MODIFY_USER_ID
+    </sql>
+    <update id="updateYljBRecord" parameterType="cc.mrbird.febs.ylj.entity.YljBRecord">
+        update ylj_b_record
+        <trim prefix="set" suffixOverrides=",">
+            <if test="grbh != null">grbh=#{grbh},</if>
+            <if test="userName != null">user_name=#{userName},</if>
+            <if test="idCard != null">id_card=#{idCard},</if>
+            <if test="fkssq != null">fkssq=#{fkssq},</if>
+            <if test="startDate != null">start_date=#{startDate},</if>
+            <if test="endDate != null">end_date=#{endDate},</if>
+            <if test="jflx != null">jflx=#{jflx},</if>
+            <if test="jfjshj != null">jfjshj=#{jfjshj},</if>
+            <if test="yldwjf != null">yldwjf=#{yldwjf},</if>
+            <if test="ylgrjf != null">ylgrjf=#{ylgrjf},</if>
+            <if test="yldwlx != null">yldwlx=#{yldwlx},</if>
+            <if test="ylgrlx != null">ylgrlx=#{ylgrlx},</if>
+            <if test="ylxj != null">ylxj=#{ylxj},</if>
+            <if test="njdwjfxz != null">njdwjfxz=#{njdwjfxz},</if>
+            <if test="njdwjfsz != null">njdwjfsz=#{njdwjfsz},</if>
+            <if test="njgrjf != null">njgrjf=#{njgrjf},</if>
+            <if test="dwxzxl != null">dwxzxl=#{dwxzxl},</if>
+            <if test="dwszlx != null">dwszlx=#{dwszlx},</if>
+            <if test="grlx != null">grlx=#{grlx},</if>
+            <if test="zsje != null">zsje=#{zsje},</if>
+            <if test="njxj != null">njxj=#{njxj},</if>
+            <if test="dwyjhj != null">dwyjhj=#{dwyjhj},</if>
+            <if test="gryjhj != null">gryjhj=#{gryjhj},</if>
+            <if test="zj != null">zj=#{zj},</if>
+            <if test="state != null">state=#{state},</if>
+            <if test="isDeletemark != null">IS_DELETEMARK=#{isDeletemark},</if>
+            <if test="createTime != null">CREATE_TIME=#{createTime},</if>
+            <if test="modifyTime != null">MODIFY_TIME=#{modifyTime},</if>
+            <if test="createUserId != null">CREATE_USER_ID=#{createUserId},</if>
+            <if test="modifyUserId != null">MODIFY_USER_ID=#{modifyUserId},</if>
+        </trim>
+        where id=#{id}
+
+    </update>
+    <select id="findYljBRecord" resultType="cc.mrbird.febs.ylj.entity.YljBRecord"
+            parameterType="cc.mrbird.febs.ylj.entity.YljBRecord">
+        select * from ylj_b_record
+        where 1=1
+        <if test="yljBRecord.grbh != null and yljBRecord.grbh != ''">and yljBRecord.grbh like concat('%',
+            #{ yljBRecord.grbh} ,'%')
+        </if>
+        <if test="yljBRecord.userName != null and yljBRecord.userName != ''">and yljBRecord.user_name like concat('%',
+            #{ yljBRecord.userName} ,'%')
+        </if>
+        <if test="yljBRecord.idCard != null and yljBRecord.idCard != ''">and yljBRecord.id_card like concat('%',
+            #{ yljBRecord.idCard} ,'%')
+        </if>
+        <if test="yljBRecord.jflx != null and yljBRecord.jflx != ''">and yljBRecord.jflx like concat('%',
+            #{ yljBRecord.jflx} ,'%')
+        </if>
+        <if test="yljBRecord.state != null">and yljBRecord.state =#{ yljBRecord.state}</if>
+        <if test="yljBRecord.isDeletemark != null">and yljBRecord.IS_DELETEMARK =#{ yljBRecord.isDeletemark}</if>
+        <if test="yljBRecord.createTimeFrom!= null">
+            AND yljBRecord.CREATE_TIME <![CDATA[ >= ]]>  #{yljBRecord.createTimeFrom}
+        </if>
+        <if test="yljBRecord.createTimeTo!= null">
+            AND yljBRecord.CREATE_TIME <![CDATA[ <= ]]>  #{yljBRecord.createTimeTo}
+        </if>
+        <if test="yljBRecord.modifyTimeFrom!= null">
+            AND yljBRecord.MODIFY_TIME <![CDATA[ >= ]]>  #{yljBRecord.modifyTimeFrom}
+        </if>
+        <if test="yljBRecord.modifyTimeTo!= null">
+            AND yljBRecord.MODIFY_TIME <![CDATA[ <= ]]>  #{yljBRecord.modifyTimeTo}
+        </if>
+    </select>
+
+    <select id="getReportYl" resultType="cc.mrbird.febs.system.domain.SbReport" parameterType="java.util.Date">
+    SELECT
+        #{bkssq} shdate,
+        count( CASE WHEN fkssq = #{bkssq} AND jflx = '当期应缴' THEN 1 END ) byyjcount,
+        count( CASE WHEN fkssq = #{ukssq} AND jflx = '当期应缴' THEN 1 END ) syyjcount,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN ylxj END ), 0 ) yjsum,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN yldwjf + yldwlx END ), 0 ) dwyjsum,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN ylgrjf + ylgrlx END ), 0 ) gryjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN ylxj END ), 0 ) bjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN yldwjf + yldwlx END ), 0 ) dwbjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN ylgrjf + ylgrlx END ), 0 ) grbjsum,
+        COUNT( CASE WHEN fkssq = #{bkssq} AND jflx != '当期应缴' THEN 1 END ) bjcount,
+        8 bxtype
+    FROM
+        ylj_b_record;
+    </select>
+
+    <select id="getReportNj" resultType="cc.mrbird.febs.system.domain.SbReport" parameterType="java.util.Date">
+    SELECT
+        #{bkssq} shdate,
+        count( CASE WHEN fkssq = #{bkssq} AND jflx = '当期应缴' THEN 1 END ) byyjcount,
+        count( CASE WHEN fkssq = #{ukssq} AND jflx = '当期应缴' THEN 1 END ) syyjcount,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN njxj END ), 0 ) yjsum,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN njdwjfxz + njdwjfsz END ), 0 ) dwyjsum,
+        ifnull( SUM( CASE WHEN jflx = '当期应缴' AND fkssq = #{bkssq} THEN njgrjf + grlx END ), 0 ) gryjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN njxj END ), 0 ) bjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN njdwjfxz + njdwjfsz END ), 0 ) dwbjsum,
+        IFNULL( SUM( CASE WHEN jflx != '当期应缴' AND fkssq = #{bkssq} THEN njgrjf + grlx END ), 0 ) grbjsum,
+        COUNT( CASE WHEN fkssq = #{bkssq} AND jflx != '当期应缴' THEN 1 END ) bjcount,
+        9 bxtype
+    FROM
+        ylj_b_record;
+    </select>
+
+    <select id="getXzByIdCardAndFkssqList" resultMap="BaseResultMap">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        ylj_b_record s
+        left join employee e on
+        s.id_card = e.idnumber
+        WHERE
+        s.fkssq = #{bkssq}
+        and s.jflx = '当期应缴'
+        AND s.id_card NOT IN ( SELECT id_card FROM ylj_b_record WHERE fkssq = #{ukssq} and jflx = '当期应缴')
+    </select>
+
+    <select id="getJsByIdCardAndFkssqList" resultMap="BaseResultMap">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        ylj_b_record s
+        left join employee e on
+        s.id_card = e.idnumber
+        WHERE
+        s.fkssq = #{ukssq}
+        and s.jflx = '当期应缴'
+        AND s.id_card NOT IN ( SELECT id_card FROM ylj_b_record WHERE fkssq = #{bkssq} and jflx = '当期应缴')
+    </select>
+
+    <select id="getBjByFkssqList" resultMap="BaseResultMap">
+        SELECT
+        s.*,
+        e.employeeid
+        FROM
+        ylj_b_record s
+        left join employee e on
+        s.id_card = e.idnumber
+        WHERE
+        s.fkssq = #{bkssq}
+        AND s.jflx != '当期应缴'
+    </select>
+
+    <select id="getRecordByIdCardNotEmolumentList" resultType="cc.mrbird.febs.ylj.entity.YljBRecord">
+        select * from ylj_b_record where fkssq=#{fkssq}
+        <if test="jflx != null">and jflx=#{jflx}</if>
+        and id_card not in (
+        select idnumber from emolument where period=#{fkssq}
+        )
+    </select>
+</mapper>

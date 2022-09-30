@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.system.dao.EmolumentMapper">
+    <resultMap id="emolumentMap" type="cc.mrbird.febs.system.domain.Emolument">
+        <!--
+          WARNING - @mbg.generated
+        -->
+    </resultMap>
+    <select id="initEmolumentList" resultMap="emolumentMap" parameterType="emolument">
+        select e.employeeid,
+        e.idnumber,
+        d.code code,
+        e.employeename,
+        c.deptname,
+        c.wardname,
+        c.job,
+        c.rszfw,
+        c.employeetype employeetype,
+        0 gwgz,
+        0 cxjt,
+        0 xjgz,
+        0 hljt,
+        0 hs,
+        0 gcb,
+        0 tgjt,
+        0 ft,
+        0 wsf,
+        0 ylbz,
+        0 dzbt,
+        0 jcxjx,
+        0 gp,
+        0 jtbt,
+        0 wybt,
+        0 cebt,
+        0 gzyf,
+        0 lmbz,
+        0 td2016,
+        0 td2017,
+        0 td2018,
+        0 td2019,
+        0 td2020,
+        0 td2021,
+        0 issue,
+        0 bzyl
+        from employee e
+        inner join employee_core  c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+    </select>
+    <select id="getEmolumentList" resultMap="emolumentMap" parameterType="emolument" >
+        select e.employeeid,
+        e.idnumber,
+        d.code code,
+        e.employeename,
+        c.dept,
+        dd.parentvaluee deptname,
+        c.ward,
+        dd.valuee wardname ,
+        c.job,
+        c.rszfw rszfw,
+        c.rszfwname,
+        c.employeetype employeetype,
+        c.status employeestatu,
+        m.id id,
+        m.qt qt,
+        m.gwgz,
+        m.cxjt,
+        m.xjgz,
+        m.hljt,
+        m.hs,
+        m.gcb,
+        m.tgjt,
+        m.ft,
+        m.wsf,
+        m.ylbz,
+        m.dzbt,
+        m.jcxjx,
+        m.gp,
+        m.jtbt,
+        m.wybt,
+        m.cebt,
+        m.gzyf,
+        m.lmbz,
+        m.td2016,
+        m.td2017,
+        m.td2018,
+        m.td2019,
+        m.td2020,
+        m.td2021,
+        m.sc,
+        m.drugcost,
+        m.hydropowercost,
+        m.roomcharge,
+        m.meetingcost,
+        m.accumulationcost,
+        m.incometax,
+        m.zgongyl,
+        m.zynj,
+        m.deylgrbj,
+        m.hrotherreduce,
+        m.savedown,
+        m.issue,
+        m.actual,
+        m.period,
+        m.bzyl,
+        bzyl.yj bzyl_yj, -- 比照养老
+        deyl.gr deyl_gr,-- 大额医疗
+        sy.gr sy_gr, -- 失业
+        yanglao.gr yanglao_gr,-- 养老
+        yl.gr yl_gr-- 医疗
+        from employee e
+        left join emolument m on e.employeeid=m.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid
+        and c.startdate &lt;= m.period and c.enddate &gt;= m.period
+        left join department dd on dd.keyy=c.ward
+        left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        left join (select SUM(yj) yj,idnumber,DATE_FORMAT(paydate, '%Y-%m') period from  sb_bzyl
+        where 1=1
+        <if test="emolument.startdate != null "> and  paydate&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  paydate&lt;=#{emolument.enddate}</if>
+         GROUP BY idnumber,DATE_FORMAT(paydate, '%Y-%m')) bzyl  on m.idnumber=bzyl.idnumber and DATE_FORMAT(m.period, '%Y-%m')=bzyl.period
+        left join  (select SUM(gr) gr,idnumber, DATE_FORMAT(paydate, '%Y-%m') period from sb_deyl
+        where 1=1
+        <if test="emolument.startdate != null "> and  paydate&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  paydate&lt;=#{emolument.enddate}</if>
+        GROUP BY idnumber,DATE_FORMAT(paydate, '%Y-%m')) deyl on m.idnumber=deyl.idnumber and DATE_FORMAT(m.period, '%Y-%m')=deyl.period
+        left join  (select SUM(gr) gr,idnumber, DATE_FORMAT(paydate, '%Y-%m')  period from sb_sy
+        where 1=1
+        <if test="emolument.startdate != null "> and  paydate&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  paydate&lt;=#{emolument.enddate}</if>
+        GROUP BY idnumber,DATE_FORMAT(paydate, '%Y-%m')) sy on m.idnumber=sy.idnumber and DATE_FORMAT(m.period, '%Y-%m')=sy.period
+        left join  (select SUM(gr) gr,idnumber, DATE_FORMAT(paydate, '%Y-%m')  period from sb_yanglao
+        where 1=1
+        <if test="emolument.startdate != null "> and  paydate&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  paydate&lt;=#{emolument.enddate}</if>
+         GROUP BY idnumber,DATE_FORMAT(paydate, '%Y-%m')) yanglao on m.idnumber=yanglao.idnumber and DATE_FORMAT(m.period, '%Y-%m')=yanglao.period
+        left join  (select SUM(gr) gr,idnumber, DATE_FORMAT(paydate, '%Y-%m')  period from sb_yl
+        where 1=1
+        <if test="emolument.startdate != null "> and  paydate&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  paydate&lt;=#{emolument.enddate}</if>
+         GROUP BY idnumber,DATE_FORMAT(paydate, '%Y-%m')) yl on m.idnumber=yl.idnumber and DATE_FORMAT(m.period, '%Y-%m')=yl.period
+        WHERE 1=1
+        <if test="emolument.emolumentflag != null ">and  (e.emolumentstatus=1 or e.emolumentstatus=3) </if>
+        <if test="emolument.period != null ">and m.period=#{emolument.period}</if>
+        <if test="emolument.employeeid != null "> and  m.employeeid=#{emolument.employeeid}</if>
+        <if test="emolument.startdate != null "> and  m.period&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  m.period&lt;=#{emolument.enddate}</if>
+        <if test="emolument.comestartdate != null "> and  e.comedate&gt;=#{emolument.comestartdate}</if>
+        <if test="emolument.comeenddate != null "> and  e.comedate&lt;=#{emolument.comeenddate}</if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and  c.status in
+            <foreach  item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+         </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+             and  c.rszfw in
+            <foreach  item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+       </if>
+       order by e.employeename,m.period
+    </select>
+
+<!--    left join (-->
+<!--    select d1.employeeid employeeid,d1.employeecode code-->
+<!--    from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1-->
+<!--    where t.employeeid=d1.employeeid and t.m=d1.enddate-->
+<!--    ) d on  e.employeeid=d.employeeid-->
+<!--    d.code code,-->
+    <select id="getEmolumentList_kq" resultMap="emolumentMap" parameterType="emolument" >
+        select e.employeeid,
+        e.emolumentstatus,
+        e.idnumber,
+        e.employeename,
+        c.dept,
+        dd.parentvaluee deptname,
+        c.ward,
+        dd.valuee wardname ,
+        c.job,
+        c.rszfw rszfw,
+        c.rszfwname,
+        c.employeetype employeetype,
+        c.status employeestatu,
+        m.id id,
+        m.qt qt,
+        m.gwgz,
+        m.cxjt,
+        m.xjgz,
+        m.hljt,
+        m.hs,
+        m.gcb,
+        m.tgjt,
+        m.ft,
+        m.wsf,
+        m.ylbz,
+        m.dzbt,
+        m.jcxjx,
+        m.gp,
+        m.jtbt,
+        m.wybt,
+        m.cebt,
+        m.gzyf,
+        m.lmbz,
+        m.td2016,
+        m.td2017,
+        m.td2018,
+        m.td2019,
+        m.td2020,
+        m.td2021,
+        m.sc,
+        m.drugcost,
+        m.hydropowercost,
+        m.roomcharge,
+        m.meetingcost,
+        m.accumulationcost,
+        m.incometax,
+        m.zgongyl,
+        m.zynj,
+        m.deylgrbj,
+        m.hrotherreduce,
+        m.savedown,
+        m.issue,
+        m.actual,
+        m.period,
+        m.bzyl
+        from employee e
+        left join emolument m on e.employeeid=m.employeeid
+        left join employee_core  c ON e.employeeid=c.employeeid
+        and c.startdate &lt;= m.period and c.enddate &gt;= m.period
+        left join department dd on dd.keyy=c.ward
+        WHERE 1=1
+        <if test="emolument.emolumentflag != null ">and (e.emolumentstatus=1 or e.emolumentstatus=3) </if>
+        <if test="emolument.period != null ">and m.period=#{emolument.period}</if>
+        <if test="emolument.employeeid != null "> and  m.employeeid=#{emolument.employeeid}</if>
+        <if test="emolument.startdate != null "> and  m.period&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  m.period&lt;=#{emolument.enddate}</if>
+        <if test="emolument.comestartdate != null "> and  e.comedate&gt;=#{emolument.comestartdate}</if>
+        <if test="emolument.comeenddate != null "> and  e.comedate&lt;=#{emolument.comeenddate}</if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and  c.status in
+            <foreach  item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and  c.rszfw in
+            <foreach  item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        order by e.employeename,m.period
+    </select>
+
+<!--    left join (-->
+<!--    select d1.employeeid employeeid,d1.employeecode code-->
+<!--    from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1-->
+<!--    where t.employeeid=d1.employeeid and t.m=d1.enddate-->
+<!--    ) d on  e.employeeid=d.employeeid-->
+    <select id="getTotalEmolument" resultMap="emolumentMap" parameterType="emolument">
+        select sum(m.qt) qt,
+        sum(m.gwgz) gwgz,
+        sum(m.cxjt) cxjt,
+        sum(m.xjgz) xjgz,
+        sum(hljt) hljt,
+        sum(m.hs) hs,
+        sum(m.gcb) gcb,
+        sum(m.tgjt) tgjt,
+        sum(m.ft) ft,
+        sum(m.wsf) wsf,
+        sum(m.ylbz) ylbz,
+        sum(m.dzbt) dzbt,
+        sum(m.jcxjx) jcxjx,
+        sum(m.gp) gp,
+        sum(m.jtbt) jtbt,
+        sum(m.wybt) wybt,
+        sum(m.cebt) cebt,
+        sum(m.gzyf) gzyf,
+        sum(m.lmbz) lmbz,
+        sum(m.td2016) td2016,
+        sum(m.td2017) td2017,
+        sum(m.td2018) td2018,
+        sum(m.td2019) td2019,
+        sum(m.td2020) td2020,
+        sum(m.td2021) td2021,
+        sum(m.sc) sc,
+        sum(m.issue) issue,
+        sum(m.bzyl*-1) bzyl,
+        count(e.employeeid) count
+        from employee e
+        left join employee_core  c ON e.employeeid=c.employeeid and  c.enddate='9999-12-31'
+        left join emolument m on e.employeeid=m.employeeid
+        WHERE  1=1
+        <if test="emolument.emolumentflag != null ">and (e.emolumentstatus=1 or e.emolumentstatus=3)</if>
+        <if test="emolument.period != null ">and m.period=#{emolument.period}</if>
+        <if test="emolument.employeeid != null "> and  m.employeeid=#{emolument.employeeid}</if>
+        <if test="emolument.startdate != null "> and  m.period&gt;=#{emolument.startdate}</if>
+        <if test="emolument.enddate != null "> and  m.period&lt;=#{emolument.enddate}</if>
+        <if test="emolument.comestartdate != null "> and  e.comedate&gt;=#{emolument.comestartdate}</if>
+        <if test="emolument.comeenddate != null "> and  e.comedate&lt;=#{emolument.comeenddate}</if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and  c.status in
+            <foreach  item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and  c.rszfw in
+            <foreach  item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        order by e.employeename,m.period
+
+    </select>
+    <select id="getDifferentReport" resultMap="emolumentMap" parameterType="emolument">
+        select a.* from(select e.employeeid,
+        d.code code,
+        e.employeename,
+        #{emolument.startdate} period,
+        c.deptname,
+        c.jobname job,
+        c.rszfw rszfw,
+        c.rszfwname,
+        c.employeetype employeetype,
+        c.status employeestatu,
+        a.issue byyf,
+        b.issue syyf,
+        ifnull(a.issue,0)-IFNULL(b.issue,0) ce
+        from employee e
+        left JOIN employee_core c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        left JOIN (select issue,employeeid FROM emolument where period=#{emolument.startdate}) a on
+        a.employeeid=e.employeeid
+        left JOIN (select issue,employeeid from emolument where period=#{emolument.enddate}) b on
+        b.employeeid=e.employeeid
+        left JOIN (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on e.employeeid=d.employeeid
+        WHERE 1=1
+        <if test="emolument.employeeid != null and emolument.employeeid !='' ">
+            and e.employeeid = #{emolument.employeeid}
+        </if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and c.status in
+            <foreach item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and c.employeetype in
+            <foreach item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="("
+                     close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and c.rszfw in
+            <foreach item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and c.dept in
+            <foreach item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>) a where a.ce != 0
+    </select>
+    <select id="getDifferentReport1" resultMap="emolumentMap" parameterType="emolument">
+        select e.employeeid,
+        e.employeename,
+        #{emolument.startdate} period,
+        dd.parentvaluee deptname,
+        c.jobname job,
+        c.rszfw rszfw,
+        c.rszfwname,
+        c.employeetype employeetype,
+        c.status employeestatu
+        from employee e
+        left JOIN employee_core c ON e.employeeid=c.employeeid
+        and c.startdate &lt;= #{emolument.startdate} and c.enddate &gt;= #{emolument.startdate}
+        left join department dd on dd.keyy=c.ward
+        WHERE 1=1
+        <if test="emolument.employeeid != null and emolument.employeeid !='' ">
+            and e.employeeid = #{emolument.employeeid}
+        </if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and c.status in
+            <foreach item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and c.employeetype in
+            <foreach item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="("
+                     close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and c.rszfw in
+            <foreach item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and c.dept in
+            <foreach item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")"
+                     separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getDifferentReportDetail" resultMap="emolumentMap" parameterType="emolument">
+        select * from emolument where period=#{emolument.startdate} and employeeid = #{emolument.employeeid}
+        UNION
+        select * from emolument where period=#{emolument.enddate} and employeeid = #{emolument.employeeid}
+    </select>
+
+    <select id="getTotalDifferentReport" resultMap="emolumentMap" parameterType="emolument">
+	    select
+	        sum(if(e.period=#{emolument.startdate},issue,0)) byyf,
+	        sum(if(e.period=#{emolument.enddate},issue,0))syyf,
+	        sum(if(e.period=#{emolument.startdate},issue,0))-sum(if(e.period=#{emolument.enddate},issue,0)) ce
+	    from
+	        emolument e
+            left join employee_core  c ON e.employeeid=c.employeeid
+            and c.startdate &lt;= #{emolument.startdate} and c.enddate &gt;= #{emolument.startdate}
+	    where
+	        1=1
+        <if test="emolument.employeeid != null and emolument.employeeid !='' ">
+            and e.employeeid = #{emolument.employeeid}
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and c.employeetype in
+            <foreach item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="("
+                     close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+	</select>
+    <select id="getCancelEmolumentList" resultMap="emolumentMap" parameterType="emolument">
+
+        select e.employeeid,
+        e.idnumber,
+        d.code code,
+        e.employeename,
+        c.dept,
+        c.deptname,
+        c.ward,
+        c.wardname,
+        c.job,
+        c.rszfw rszfw,
+        c.rszfwname,
+        c.employeetype employeetype,
+        c.status employeestatu
+        from employee e
+        left join employee_core  c ON e.employeeid=c.employeeid and  c.enddate='9999-12-31'
+        left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        WHERE  e.emolumentstatus=1
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and  c.status in
+            <foreach  item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and  c.rszfw in
+            <foreach  item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        order by e.employeename
+	</select>
+
+    <select id="getUnEmolumentList" resultMap="emolumentMap" parameterType="emolument">
+        select e.employeeid,
+        e.idnumber,
+        d.code code,
+        e.employeename,
+        c.deptname,
+        c.wardname,
+        c.job,
+        c.rszfwname,
+        c.employeetype employeetype
+        from employee e
+        left join employee_core  c ON e.employeeid=c.employeeid and c.enddate='9999-12-31'
+        left join (select d1.employeeid employeeid,d1.employeecode code
+        from (select employeeid,max(enddate) m from code GROUP BY employeeid) t,code d1
+        where t.employeeid=d1.employeeid and t.m=d1.enddate) d on  e.employeeid=d.employeeid
+        WHERE e.emolumentstatus is null
+        <if test="emolument.employeeid != null "> and  c.employeeid=#{emolument.employeeid}</if>
+        <if test="emolument.states != null and emolument.states !='' and emolument.states .split(',').length>0 ">
+            and  c.status in
+            <foreach  item="employeestatu" collection="emolument.states.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeestatu,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.employeetypes != null and emolument.employeetypes !='' and emolument.employeetypes .split(',').length>0 ">
+            and  c.employeetype in
+            <foreach  item="employeetype" collection="emolument.employeetypes.split(',')" index="index" open="(" close=")" separator=",">
+                #{employeetype,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="emolument.rszfws != null and emolument.rszfws!='' and emolument.rszfws.split(',').length>0">
+            and  c.rszfw in
+            <foreach  item="rszfw" collection="emolument.rszfws.split(',')" index="index" open="(" close=")" separator=",">
+                #{rszfw,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test=" emolument.deptids != null and  emolument.deptids != '' and emolument.deptids.split(',').length>0">
+            and  c.dept in
+            <foreach  item="dept" collection="emolument.deptids.split(',')" index="index" open="(" close=")" separator=",">
+                #{dept,jdbcType=BIGINT}
+            </foreach>
+        </if>
+       </select>
+
+    <update id="passEmolument">
+        update emolument set status=1 where periodId=#{periodId,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByEmployeeids"   parameterType="emolument">
+        update  emolument set qt=#{emolument.qt,jdbcType=DECIMAL},
+        gwgz=#{emolument.gwgz,jdbcType=DECIMAL},
+        cxjt=#{emolument.cxjt,jdbcType=DECIMAL},
+        xjgz=#{emolument.xjgz,jdbcType=DECIMAL},
+        hljt=#{emolument.hljt,jdbcType=DECIMAL},
+        hs=#{emolument.hs,jdbcType=DECIMAL},
+        gcb=#{emolument.gcb,jdbcType=DECIMAL},
+        tgjt=#{emolument.tgjt,jdbcType=DECIMAL},
+        ft=#{emolument.ft,jdbcType=DECIMAL},
+        wsf=#{emolument.wsf,jdbcType=DECIMAL},
+        bzyl=#{emolument.bzyl,jdbcType=DECIMAL},
+        ylbz=#{emolument.ylbz,jdbcType=DECIMAL},
+        dzbt=#{emolument.dzbt,jdbcType=DECIMAL},
+        jcxjx=#{emolument.jcxjx,jdbcType=DECIMAL},
+        gp=#{emolument.gp,jdbcType=DECIMAL},
+        jtbt=#{emolument.jtbt,jdbcType=DECIMAL},
+        wybt=#{emolument.wybt,jdbcType=DECIMAL},
+        cebt=#{emolument.cebt,jdbcType=DECIMAL},
+        gzyf=#{emolument.gzyf,jdbcType=DECIMAL},
+        lmbz=#{emolument.lmbz,jdbcType=DECIMAL},
+        td2016=#{emolument.td2016,jdbcType=DECIMAL},
+        td2017=#{emolument.td2017,jdbcType=DECIMAL},
+        td2018=#{emolument.td2018,jdbcType=DECIMAL},
+        td2019=#{emolument.td2019,jdbcType=DECIMAL},
+        td2020=#{emolument.td2020,jdbcType=DECIMAL},
+        td2021=#{emolument.td2021,jdbcType=DECIMAL},
+        sc=#{emolument.sc,jdbcType=DECIMAL},
+        issue=#{emolument.qt,jdbcType=DECIMAL}+#{emolument.gwgz,jdbcType=DECIMAL}+#{emolument.cxjt,jdbcType=DECIMAL}+#{emolument.xjgz,jdbcType=DECIMAL}+#{emolument.hljt,jdbcType=DECIMAL}+#{emolument.hs,jdbcType=DECIMAL}+#{emolument.gcb,jdbcType=DECIMAL}
+        +#{emolument.tgjt,jdbcType=DECIMAL}+#{emolument.ft,jdbcType=DECIMAL}+#{emolument.wsf,jdbcType=DECIMAL}+#{emolument.dzbt,jdbcType=DECIMAL}+#{emolument.jcxjx,jdbcType=DECIMAL}
+        +#{emolument.gp,jdbcType=DECIMAL}+#{emolument.jtbt,jdbcType=DECIMAL}+#{emolument.wybt,jdbcType=DECIMAL}+#{emolument.cebt,jdbcType=DECIMAL}+#{emolument.gzyf,jdbcType=DECIMAL}+#{emolument.td2016,jdbcType=DECIMAL}
+        +#{emolument.td2017,jdbcType=DECIMAL}+#{emolument.td2018,jdbcType=DECIMAL}+#{emolument.td2019,jdbcType=DECIMAL}+#{emolument.td2020,jdbcType=DECIMAL}+#{emolument.td2021,jdbcType=DECIMAL}+#{emolument.sc,jdbcType=DECIMAL}
+        where id in
+        <foreach item="id" collection="emolument.ids.split(',')"  index="index" open="(" close=")" separator=",">
+            #{id,jdbcType=DECIMAL}
+        </foreach>
+    </update>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach item="emolument" collection="emolumentList"  index="index" open="" close="" separator=";">
+            update  emolument set  	qt=#{emolument.qt,jdbcType=DECIMAL},
+            gwgz=#{emolument.gwgz,jdbcType=DECIMAL},
+            cxjt=#{emolument.cxjt,jdbcType=DECIMAL},
+            xjgz=#{emolument.xjgz,jdbcType=DECIMAL},
+            hljt=#{emolument.hljt,jdbcType=DECIMAL},
+            hs=#{emolument.hs,jdbcType=DECIMAL},
+            gcb=#{emolument.gcb,jdbcType=DECIMAL},
+            tgjt=#{emolument.tgjt,jdbcType=DECIMAL},
+            ft=#{emolument.ft,jdbcType=DECIMAL},
+            wsf=#{emolument.wsf,jdbcType=DECIMAL},
+            bzyl=#{emolument.bzyl,jdbcType=DECIMAL},
+            ylbz=#{emolument.ylbz,jdbcType=DECIMAL},
+            dzbt=#{emolument.dzbt,jdbcType=DECIMAL},
+            jcxjx=#{emolument.jcxjx,jdbcType=DECIMAL},
+            gp=#{emolument.gp,jdbcType=DECIMAL},
+            jtbt=#{emolument.jtbt,jdbcType=DECIMAL},
+            wybt=#{emolument.wybt,jdbcType=DECIMAL},
+            cebt=#{emolument.cebt,jdbcType=DECIMAL},
+            gzyf=#{emolument.gzyf,jdbcType=DECIMAL},
+            lmbz=#{emolument.lmbz,jdbcType=DECIMAL},
+            td2016=#{emolument.td2016,jdbcType=DECIMAL},
+            td2017=#{emolument.td2017,jdbcType=DECIMAL},
+            td2018=#{emolument.td2018,jdbcType=DECIMAL},
+            td2019=#{emolument.td2019,jdbcType=DECIMAL},
+            td2020=#{emolument.td2020,jdbcType=DECIMAL},
+            td2021=#{emolument.td2021,jdbcType=DECIMAL},
+            sc=#{emolument.sc,jdbcType=DECIMAL},
+            issue=#{emolument.qt,jdbcType=DECIMAL}+#{emolument.gwgz,jdbcType=DECIMAL}+#{emolument.cxjt,jdbcType=DECIMAL}+#{emolument.xjgz,jdbcType=DECIMAL}+#{emolument.hljt,jdbcType=DECIMAL}+#{emolument.hs,jdbcType=DECIMAL}+#{emolument.gcb,jdbcType=DECIMAL}
+            +#{emolument.tgjt,jdbcType=DECIMAL}+#{emolument.ft,jdbcType=DECIMAL}+#{emolument.wsf,jdbcType=DECIMAL}+#{emolument.dzbt,jdbcType=DECIMAL}+#{emolument.jcxjx,jdbcType=DECIMAL}
+            +#{emolument.gp,jdbcType=DECIMAL}+#{emolument.jtbt,jdbcType=DECIMAL}+#{emolument.wybt,jdbcType=DECIMAL}+#{emolument.cebt,jdbcType=DECIMAL}+#{emolument.gzyf,jdbcType=DECIMAL}+#{emolument.td2016,jdbcType=DECIMAL}
+            +#{emolument.td2017,jdbcType=DECIMAL}+#{emolument.td2018,jdbcType=DECIMAL}+#{emolument.td2019,jdbcType=DECIMAL}+#{emolument.td2020,jdbcType=DECIMAL}+#{emolument.td2021,jdbcType=DECIMAL}+#{emolument.sc,jdbcType=DECIMAL}
+            where periodid=#{emolument.periodid,jdbcType=DECIMAL} and employeeid =#{emolument.employeeid,jdbcType=DECIMAL}
+        </foreach>
+    </update>
+
+    <select id="getEmolumentByEmployeeidAndPeriod" resultMap="emolumentMap" parameterType="emolument">
+        select * from emolument where period=#{period} and employeeid=#{employeeid}
+    </select>
+
+    <update id="updateByIdnumbers" parameterType="java.util.List">
+        <foreach item="emolument" collection="emolumentList"  index="index" open="" close="" separator=";">
+            update  emolument set  	dept=#{emolument.dept},
+            deptname=#{emolument.deptname},
+            ward=#{emolument.ward},
+            wardname=#{emolument.wardname},
+            employeestatu=#{emolument.employeestatu},
+            employeetype=#{emolument.employeetype},
+            rszfw=#{emolument.rszfw},
+            rszfwname=#{emolument.rszfwname}
+            where id=#{emolument.id}
+        </foreach>
+    </update>
+
+    <update id="updateByEmployeeIdAndPeriod" parameterType="emolument">
+        update  emolument set  	drugcost=#{emolument.drugcost},
+        hydropowercost=#{emolument.hydropowercost},
+        roomcharge=#{emolument.roomcharge},
+        meetingcost=#{emolument.meetingcost},
+        accumulationcost=#{emolument.accumulationcost},
+        incometax=#{emolument.incometax},
+        zgongyl=#{emolument.zgongyl},
+        zynj=#{emolument.zynj},
+        deylgrbj=#{emolument.deylgrbj},
+        hrotherreduce=#{emolument.hrotherreduce},
+        savedown=#{emolument.savedown},
+        actual=#{emolument.actual}
+        where employeeid=#{emolument.employeeid} and period=#{periodStr}
+    </update>
+
+</mapper>
